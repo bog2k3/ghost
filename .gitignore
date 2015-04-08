@@ -28,11 +28,7 @@
 *.app
 .metadata/
 RemoteSystemsTempFiles/
-cupid/Debug/
-watchdog/Debug
-cupid/.cproject
-cupid/.settings/
-cupid/.project
-watchdog/.cproject
-watchdog/.project
-watchdog/.settings/
+Debug/
+.cproject
+.settings/
+.project
