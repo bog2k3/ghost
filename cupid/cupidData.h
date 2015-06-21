@@ -42,7 +42,12 @@ struct cupidSiteData {
 	// ...
 };
 
-typedef std::pair<unsigned, unsigned> cupidPair; // pereche de indexi in vectorul de jocuri pentru o meciuire.
+struct cupidPair
+{
+	unsigned index1;	// pereche de indexi in vectorul de jocuri pentru o meciuire.
+	unsigned index2;
+	double ratio;		// raportul in care trebuie pariat (ratio = suma1 / suma2) pentru profit maxim
+};
 
 extern std::vector<cupidGameData> gameData; // vectorul de jocuri - vine din baza de date
 extern std::vector<cupidPair> pairs; // vectorul de meciuiri intre jocuri pe care punem comenzi
