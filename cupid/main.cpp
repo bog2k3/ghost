@@ -30,6 +30,8 @@ int main(int argc, char* argv[]) {
 		plaseazaComenzile();
 		sleep(1); // cupid sleeps for 1 second between cycles
 		curataDatele();
+
+		break;
 	}
 	omoaraChelneri();
 	return 0;
