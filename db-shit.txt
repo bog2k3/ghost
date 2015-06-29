@@ -1,3 +1,8 @@
+ip1: 86.125.49.222
+ip2: 93.120.69.3
+port: 46466
+db : ghost , user : ghost parola : D58jKe3TZJgXaeYTp9DCF4Kx
+
 // pt add user admin:
 $ gsec -add USER -pw PASW -admin yes
 

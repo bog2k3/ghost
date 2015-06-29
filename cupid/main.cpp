@@ -14,6 +14,7 @@ std::vector<cupidPair> pairs;
 std::map<siteId, cupidSiteData> mapSites;
 
 void initializeazaChelneri();
+void initializeazaDB();
 void omoaraChelneri();
 void faQueryul();
 void gasestePerechi();
@@ -22,6 +23,7 @@ void curataDatele();
 
 int main(int argc, char* argv[]) {
 	initializeazaChelneri();
+	initializeazaDB();
 	while (true) { // yes, Cupid lives forever! (or until it crashes)
 		faQueryul(); // astea trebuie sa se faca pe un tabel de sport - parametru de comanda la cupid?
 		gasestePerechi();
