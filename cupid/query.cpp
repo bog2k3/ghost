@@ -28,14 +28,10 @@ void initializeazaDB() {
 	  con->setSchema("ghost");
 
 	  stmt = con->createStatement();
-	  res = stmt->executeQuery("SELECT 'Hello World!' AS _message");
+	  res = stmt->executeQuery("select * from fotbal");
 	  while (res->next()) {
-	    std::cout << "\t... MySQL replies: ";
-	    /* Access column data by alias or column name */
-	    std::cout << res->getString("_message") << std::endl;
-	    std::cout << "\t... MySQL says it again: ";
-	    /* Access column fata by numeric offset, 1 is the first column */
-	    std::cout << res->getString(1) << std::endl;
+	    for (int i=1; i<16; i++)
+	    	std::cout << res->getString(i) << ", ";
 	  }
 	  delete res;
 	  delete stmt;
