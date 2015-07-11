@@ -21,7 +21,13 @@ void gasestePerechi();
 void plaseazaComenzile();
 void curataDatele();
 
+void test(); // to test shit, like curl, sql etc
+
 int main(int argc, char* argv[]) {
+
+	test();
+	return 0;
+
 	initializeazaChelneri();
 	initializeazaDB();
 	while (true) { // yes, Cupid lives forever! (or until it crashes)
