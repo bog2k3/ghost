@@ -20,7 +20,7 @@ static int writer(char *data, size_t size, size_t nmemb, std::string *writerData
   return size * nmemb;
 }
 
-void test() {
+void testCurl() {
 	CURL *curl;
 	CURLcode res;
 
@@ -64,4 +64,6 @@ void test() {
 	curl_global_cleanup();
 }
 
+void testDB() {
 
+}

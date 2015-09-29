@@ -21,15 +21,19 @@ void gasestePerechi();
 void plaseazaComenzile();
 void curataDatele();
 
-void test(); // to test shit, like curl, sql etc
+// to test shit, like curl, sql etc
+void testCurl();
+void testDB();
 
 int main(int argc, char* argv[]) {
 
-	test();
-	return 0;
+//	testCurl();
 
 	initializeazaChelneri();
 	initializeazaDB();
+
+	return 0;
+
 	while (true) { // yes, Cupid lives forever! (or until it crashes)
 		faQueryul(); // astea trebuie sa se faca pe un tabel de sport - parametru de comanda la cupid?
 		gasestePerechi();
