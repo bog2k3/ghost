@@ -7,8 +7,9 @@ FARMER is the chrome extension that farms for data.
 
 HOW TO BUILD & RUN:
 * use Eclipse CDT
-* add these libraries: 
-	sqlapi 
+* add these libraries:
+	mysqlcppconn/sqlapi 
+	curl
 	dl
 * add these library paths:
 	"${workspace_loc:/${ProjName}}/api/sqlapi/lib/amd64"
