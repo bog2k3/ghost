@@ -9,7 +9,7 @@
 #include <string>
 #include <iostream>
 
-static char errorBuffer[CURL_ERROR_SIZE];
+static char errorBuffer[CURL_ERROR_SIZE+1];
 static std::string buffer;
 
 static int writer(char *data, size_t size, size_t nmemb, std::string *writerData) {
@@ -41,6 +41,11 @@ void test() {
 		}
 
 		if (curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer) != CURLE_OK)
+		{
+			fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
+		}
+
+		if (curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer) != CURLE_OK)
 		{
 			fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
 		}
