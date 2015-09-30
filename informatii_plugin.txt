@@ -1,0 +1,5 @@
+ori in care sunt scrise content_scripturile este ordinea in care sunt incarcate in plugin
+
+ex:
+-fotbal_class.js este incarcat inantea fisierului parse_page.js deci in parse_page pot folsi structura definita anterio
+DESTUL DE SMECHER

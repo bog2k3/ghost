@@ -1,12 +1,19 @@
 
+
+
 var getTableContent = function  () {
+    
+    
 	console.debug("listener fired.");
+        
+
         
         // pentru stanley bet
         
         var query = document.querySelectorAll('table.pariu');
         
         console.debug(query.length);
+        
         
         [].forEach.call( query, 
 		function  fn(table){
@@ -25,10 +32,11 @@ var getTableContent = function  () {
                     
                     for (var i=0,n=table_nodes.length;i<n;i++) {
                         if (table_nodes[i].nodeName.toLowerCase() != "tbody") continue;
-                        console.debug(table_nodes[i].nodeName);
+                        //console.debug(table_nodes[i].nodeName);
                         
                         // se citesc copii din tbody
                         var tbody = table_nodes[i].childNodes;
+                        var meci_fotbal_rec = new meci_fotbal();
                         
                         for (var j=0,n_tbody=tbody.length;j<n_tbody;j++) {
                             if (tbody[i].nodeName.toLowerCase() == "tr") {
@@ -36,19 +44,25 @@ var getTableContent = function  () {
                                 
                                 var informatii_meci = tbody[i].childNodes;
                                 
+                                
                                 [].forEach.call(informatii_meci,
                                     function(meci){
                                         if (meci.className) {
-                                            console.debug(meci.className);
-                                            console.debug(meci.innerText);
+                                            //console.debug(meci.className);
+                                            //console.debug(meci.innerText);
+                                            
+                                            meci_fotbal_rec.add_info(meci.className,meci.innerText);
                                         }
                                 });
+                                
                                 
                                 // odata gasit tr'ul se iese din loop
                                 // am procedat asa in cazul in care nu gasesc tr sa nu bag balarii in DB
                                 break;
                             } 
                         }
+                        
+                        console.debug(meci_fotbal_rec.to_text());
                         
                         
 
@@ -60,7 +74,7 @@ var getTableContent = function  () {
         );
         
        
-/*        var table = query[0];
+        /*var table = query[0];
             
         console.debug(table.childNodes.length);
             
