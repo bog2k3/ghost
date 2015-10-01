@@ -46,7 +46,7 @@ void initializeazaDB() {
 	}
 }
 
-void faQueryul() {
+void faQueryul(std::string tabel) {
 
 }
 

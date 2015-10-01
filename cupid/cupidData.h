@@ -37,6 +37,7 @@ struct cupidGameData {
 };
 
 struct cupidSiteData {
+	std::string siteName;
 	iChelner* chelner;	// chelnerul care primeste comenzi pentru site-ul asta
 	// daca mai tre sa tinem si alte informatii despre site, bagam aici
 	// ...

@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "cupidData.h"
+#include "cmdLine.h"
 
 std::vector<cupidGameData> gameData;
 std::vector<cupidPair> pairs;
@@ -16,7 +17,7 @@ std::map<siteId, cupidSiteData> mapSites;
 void initializeazaChelneri();
 void initializeazaDB();
 void omoaraChelneri();
-void faQueryul();
+void faQueryul(std::string tabel);
 void gasestePerechi();
 void plaseazaComenzile();
 void curataDatele();
@@ -26,6 +27,8 @@ void testCurl();
 void testDB();
 
 int main(int argc, char* argv[]) {
+	cmdLineOptions cmdOpts;
+	parseCommandLine(cmdOpts, argc, argv);
 
 //	testCurl();
 
@@ -35,7 +38,7 @@ int main(int argc, char* argv[]) {
 	return 0;
 
 	while (true) { // yes, Cupid lives forever! (or until it crashes)
-		faQueryul(); // astea trebuie sa se faca pe un tabel de sport - parametru de comanda la cupid?
+		faQueryul(cmdOpts.tableName);
 		gasestePerechi();
 		plaseazaComenzile();
 		sleep(1); // cupid sleeps for 1 second between cycles
