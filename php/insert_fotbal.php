@@ -20,10 +20,10 @@ include 'database_setup.php';
 	cota_1x			- float
 	cota_2x			- float
 	cota_12			- float
-	hash_joc		- int (PK)
 	site_id_1		- varchar(12)
 	game_id_1		- varchar(12)
 	timp 			- timestamp (current)
+        hash_joc		- varchar(64) (PK)
 
 ************************************************/
 
@@ -75,7 +75,7 @@ if ($game == '')
 $game		=	$_GET["game_id"];
 
 // hasul se calculeaza
-$hash_game      =       1;
+$hash_game="";
 
 
 $con = mysqli_connect($servername,$username,$password,$database,$database_port);
@@ -84,8 +84,8 @@ if (!$con) {
 	die("Connection failed: " . mysqli_error($con));
 }
 
-$query = 'insert into fotbal(sesiune,echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,hash_joc,site_id_1,game_id_1) values ('.
-        $id_sesiune.','.
+
+$values = $id_sesiune.','.
         '\''.$echipa1.'\''.','.
         '\''.$echipa2.'\''.','.
         $cota1.','.
@@ -94,9 +94,16 @@ $query = 'insert into fotbal(sesiune,echipa1,echipa2,cota_1,cota_2,cota_x,cota_1
         $cota1x.','.
         $cota2x.','.
         $cota12.','.
-        $hash_game.','.
         '\''.$site.'\''.','.
-        '\''.$game.'\''.
+        '\''.$game.'\'';
+
+$hash_game=hash('sha256',$values);
+
+$values = $values.
+          
+$query = 'insert into fotbal(sesiune,echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id_1,game_id_1,hash_joc) values ('.
+        $values.','.
+        '\''.$hash_game.'\''.
         ')';
 
 echo $query;

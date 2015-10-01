@@ -64,11 +64,38 @@ function meci_fotbal() {
     }
     
     this.to_text = function() {
-        return "datra= "+this.data+" echipe1= "+this.echipa1+" echipa2= "+this.echipa2+
+        return "data= "+this.data+" echipe1= "+this.echipa1+" echipa2= "+this.echipa2+
                " Cota1= "+this.cota_1+" Cota2= "+this.cota_2+
                " Cotax= "+this.cota_x+" Cota12= "+this.cota_12+
                " Cota1x= "+this.cota_1x+" Cota2x= "+this.cota_2x+
                " Cota12= "+this.cota_12;
+    }
+    
+    this.upload_to_db = function () {
+        
+        // se creeaza requestul
+        var s = new extension_settings();
+        
+        http_request = s.backend_php_server_protocol+"://"+
+                       s.backend_php_server+":"+
+                       s.backend_php_server_port+
+                       s.backend_php_server_fotbal+
+                       "?sesiune=1"+
+                       "&e1="+this.echipa1+
+                       "&e2="+this.echipa2+
+                       "&c1="+this.cota_1+
+                       "&c2="+this.cota_2+
+                       "&cx="+this.cota_x+
+                       "&c1x="+this.cota_1x+
+                       "&c2x="+this.cota_2x+
+                       "&c12="+this.cota_12+
+                       "&site=stanley"+
+                       "&game_id=TODO";
+        $.getJSON(http_request,
+            function(data) {
+                return;
+            });
+        //return http_request;
     }
 
 }

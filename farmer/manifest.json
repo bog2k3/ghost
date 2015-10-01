@@ -18,7 +18,7 @@
 	"content_scripts": [
                 {
                         "matches": ["https://*/*","http://*/*"],
-                        "js": ["js/fotbal_class.js","js/parse_page.js"],
+                        "js": ["jsthirdparty/jquery-1.11.3.min.js","js/setup.js","js/fotbal_class.js","js/parse_page.js"],
 			"run_at": "document_end",
 			"all_frames": true
                 }
