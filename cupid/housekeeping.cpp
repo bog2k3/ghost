@@ -5,6 +5,8 @@
  *      Author: bog
  */
 
+#include "cupidData.h"
+
 void initializeazaChelneri() {
 
 }
@@ -14,7 +16,8 @@ void omoaraChelneri() {
 }
 
 void curataDatele() {
-
+	gameData.clear();
+	pairs.clear();
 }
 
 

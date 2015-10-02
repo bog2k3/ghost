@@ -5,4 +5,5 @@
 * [farmare PHP] query pe DB daca exista deja inregistrarea cu acelasi PK, daca da ? update : insert
 * [DB] cand fac query sa-mi vina grupate inregistrarile cu acelasi hash_joc_comun una dupa alta, ca sa fac
 	matchuirea mai rapid
+* [farmare] !!! tre sa stergem din DB meciurile care au expirat !!!
 
