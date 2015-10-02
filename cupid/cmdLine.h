@@ -13,6 +13,10 @@
 struct cmdLineOptions {
 	std::string tableName;
 	std::string configFilePath;
+	std::string dbURI;
+	std::string dbUser;
+	std::string dbPassw;
+	std::string dbName;
 };
 
 void parseCommandLine(cmdLineOptions &opts, int argc, char* argv[]);

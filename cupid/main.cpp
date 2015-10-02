@@ -9,13 +9,16 @@
 
 #include "cupidData.h"
 #include "cmdLine.h"
+#include "SQLSock.h"
+#include "../cpplib/log.h"
 
 std::vector<cupidGameData> gameData;
 std::vector<cupidPair> pairs;
 std::map<siteId, cupidSiteData> mapSites;
 
+void parseConfigFile(cmdLineOptions &opts);
 void initializeazaChelneri();
-void initializeazaDB();
+bool initializeazaDB(SQLSock &socket, std::string const& URI, std::string const& user, std::string const& passw, std::string const& dbName);
 void omoaraChelneri();
 void faQueryul(std::string tabel);
 void gasestePerechi();
@@ -27,13 +30,21 @@ void testCurl();
 void testDB();
 
 int main(int argc, char* argv[]) {
+	LOGGER("cupid");
 	cmdLineOptions cmdOpts;
 	parseCommandLine(cmdOpts, argc, argv);
+	if (!cmdOpts.configFilePath.empty())
+		parseConfigFile(cmdOpts);
 
 //	testCurl();
 
 	initializeazaChelneri();
-	initializeazaDB();
+
+	SQLSock sqlSock;
+	if (!initializeazaDB(sqlSock, cmdOpts.dbURI, cmdOpts.dbUser, cmdOpts.dbPassw, cmdOpts.dbName)) {
+		ERROR("Could not initialize database connection!");
+		return -1;
+	}
 
 	return 0;
 
