@@ -70,10 +70,3 @@ std::unique_ptr<sql::ResultSet> SQLSock::doQuery(std::string const& query) {
 		return nullptr;
 	}
 }
-
-/*
- * while (res->next()) {
--	    for (int i=1; i<16; i++)
--	    	std::cout << res->getString(i) << ", ";
--	  }
- */
