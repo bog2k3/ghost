@@ -17,7 +17,7 @@ void parseConfigFile(cmdLineOptions &opts) {
 	if (!f.is_open())
 		return;
 
-	LOG("parsing config file \"" << opts.configFilePath << "\"...");
+	LOGLN("parsing config file \"" << opts.configFilePath << "\"...");
 
 	std::map<std::string, std::string*> mapKeyValues;
 	mapKeyValues["URI"] = &opts.dbURI;
@@ -43,7 +43,7 @@ void parseConfigFile(cmdLineOptions &opts) {
 
 			*mapKeyValues[tokenName] = value;
 		}
-		LOG("finished parsing config file.");
+		LOGLN("finished parsing config file.");
 	} catch (std::runtime_error &err) {
 		ERROR("Reading config file " << opts.configFilePath <<"\n" << err.what());
 	}

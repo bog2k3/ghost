@@ -18,8 +18,8 @@ bool initializeazaDB(SQLSock &socket, std::string const& URI, std::string const&
 	return true;
 }
 
-void faQueryul(std::string tabel) {
-
+void faQueryul(SQLSock &socket, std::string tabel) {
+	auto res = socket.doQuery("select * from " + tabel);
 }
 
 

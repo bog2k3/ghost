@@ -20,7 +20,7 @@ void parseConfigFile(cmdLineOptions &opts);
 void initializeazaChelneri();
 bool initializeazaDB(SQLSock &socket, std::string const& URI, std::string const& user, std::string const& passw, std::string const& dbName);
 void omoaraChelneri();
-void faQueryul(std::string tabel);
+void faQueryul(SQLSock &socket, std::string tabel);
 void gasestePerechi();
 void plaseazaComenzile();
 void curataDatele();
@@ -46,10 +46,8 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	return 0;
-
 	while (true) { // yes, Cupid lives forever! (or until it crashes)
-		faQueryul(cmdOpts.tableName);
+		faQueryul(sqlSock, cmdOpts.tableName);
 		gasestePerechi();
 		plaseazaComenzile();
 		sleep(1); // cupid sleeps for 1 second between cycles
