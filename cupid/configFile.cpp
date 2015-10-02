@@ -28,6 +28,9 @@ void parseConfigFile(cmdLineOptions &opts) {
 	std::string line;
 	try {
 		while (std::getline(f, line)) {
+			if (line.empty())
+				continue;
+
 			std::stringstream ss(line);
 
 			std::string tokenName, equalSign, value;
@@ -40,6 +43,7 @@ void parseConfigFile(cmdLineOptions &opts) {
 
 			*mapKeyValues[tokenName] = value;
 		}
+		LOG("finished parsing config file.");
 	} catch (std::runtime_error &err) {
 		ERROR("Reading config file " << opts.configFilePath <<"\n" << err.what());
 	}
