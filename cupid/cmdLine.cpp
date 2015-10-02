@@ -11,7 +11,7 @@
 
 
 #define EXPECT_ARG_AFTER(X, argc, i) if (argc == i+1) { \
-	ERROR("expected argument after " << X); \
+	ERROR("asteptam un argument dupa " << X); \
 	exit(-1); \
 }
 

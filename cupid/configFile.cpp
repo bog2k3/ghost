@@ -17,7 +17,7 @@ void parseConfigFile(cmdLineOptions &opts) {
 	if (!f.is_open())
 		return;
 
-	LOGLN("parsing config file \"" << opts.configFilePath << "\"...");
+	LOGLN("citim fisierul de config \"" << opts.configFilePath << "\"...");
 
 	std::map<std::string, std::string*> mapKeyValues;
 	mapKeyValues["URI"] = &opts.dbURI;
@@ -37,15 +37,15 @@ void parseConfigFile(cmdLineOptions &opts) {
 			ss >> tokenName >> equalSign >> value;
 
 			if (mapKeyValues.find(tokenName) == mapKeyValues.end()) {
-				ERROR("Unknown key \"" << tokenName << "\" in config file");
+				ERROR("Cheie necunoscuta \"" << tokenName << "\" in fisierul de config!");
 				continue;
 			}
 
 			*mapKeyValues[tokenName] = value;
 		}
-		LOGLN("finished parsing config file.");
+		LOGLN("am terminat de parsat fisierul de config.");
 	} catch (std::runtime_error &err) {
-		ERROR("Reading config file " << opts.configFilePath <<"\n" << err.what());
+		ERROR("Citirea fisierului de config \"" << opts.configFilePath <<"\"\n" << err.what());
 	}
 }
 

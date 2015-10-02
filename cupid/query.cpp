@@ -50,7 +50,6 @@ describe fotbal
 void faQueryul(SQLSock &socket, std::string tabel) {
 	auto res = socket.doQuery("select * from " + tabel);
 
-	int crtRecord = 0;
 	while (res->next()) {
 		cupidGameData data;
 		data.internalGameId = res->getString(13);	// TODO - trebuie din coloana hash_joc_comun, nu hash_joc
@@ -65,6 +64,8 @@ void faQueryul(SQLSock &socket, std::string tabel) {
 
 		gameData.push_back(data);
 	}
+
+	LOGLN("am tras " << gameData.size() << " inregistrari din baza de date.");
 }
 
 

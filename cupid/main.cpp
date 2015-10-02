@@ -42,9 +42,11 @@ int main(int argc, char* argv[]) {
 
 	SQLSock sqlSock;
 	if (!initializeazaDB(sqlSock, cmdOpts.dbURI, cmdOpts.dbUser, cmdOpts.dbPassw, cmdOpts.dbName)) {
-		ERROR("Could not initialize database connection!");
+		ERROR("Nu s-a putut initializa conexiunea la baza de date, shefu'!");
 		return -1;
 	}
+
+	LOGLN("cupid incepe loop-ul de match-making...");
 
 	while (true) { // yes, Cupid lives forever! (or until it crashes)
 		faQueryul(sqlSock, cmdOpts.tableName);
