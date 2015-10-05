@@ -17,6 +17,8 @@ function meci_fotbal() {
     this.cota_2x="";
     this.cota_12="";
     this.data="";
+    this.cod="";
+
     
     this.add_info = function(header,text) {
         switch (header) {
@@ -60,6 +62,9 @@ function meci_fotbal() {
                 this.echipa1=echipe[0];
                 this.echipa2=echipe[1];
                 break;
+            case "cod" :
+                this.cod= text.replace(/(\r\n|\n|\r)/gm,"");
+                break;
         }
     }
     
@@ -68,7 +73,7 @@ function meci_fotbal() {
                " Cota1= "+this.cota_1+" Cota2= "+this.cota_2+
                " Cotax= "+this.cota_x+" Cota12= "+this.cota_12+
                " Cota1x= "+this.cota_1x+" Cota2x= "+this.cota_2x+
-               " Cota12= "+this.cota_12;
+               " Cota12= "+this.cota_12+" data = "+this.data+" cod= "+this.cod;
     }
     
     this.upload_to_db = function () {
@@ -90,12 +95,12 @@ function meci_fotbal() {
                        "&c2x="+this.cota_2x+
                        "&c12="+this.cota_12+
                        "&site=stanley"+
-                       "&game_id=TODO";
+                       "&game_id="+this.cod;
         $.getJSON(http_request,
             function(data) {
                 return;
             });
-        //return http_request;
+        return http_request;
     }
 
 }

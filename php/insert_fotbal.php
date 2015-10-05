@@ -24,8 +24,16 @@ include 'database_setup.php';
 	game_id_1		- varchar(12)
 	timp 			- timestamp (current)
         hash_joc		- varchar(64) (PK)
-
+        hash_joc_comun          - varchar(64)
+        echipa1_internal        - varchar(32)
+        echipa2_internal        - varchar(32)
+        data_joc                - varchar(10)
 ************************************************/
+
+/**
+ * echipa1_internal si echipa2_internal sunt echipele traduse 
+ * folosind dictionarul 
+ */
 
 // se extrag parametrii din post
 // folosesc si get si post pentru a testa direct php'ul
@@ -74,9 +82,19 @@ $game		=	$_POST["game_id"];
 if ($game == '') 
 $game		=	$_GET["game_id"];
 
-// hasul se calculeaza
-$hash_game="";
+$game_date      =       $_POST["game_date"];
+if ($game_date == '') 
+$game_date      =	$_GET["game_date"];
 
+// hasul se calculeaza
+$hash_game_pk="";
+$hash_game_comun="";
+
+// TODO : trebuie facut dictionarul de echipe/site
+// TODO : tabela de erori
+
+$echipa1_internal = $echipa1; 
+$echipa2_internal = $echipa2; 
 
 $con = mysqli_connect($servername,$username,$password,$database,$database_port);
 
@@ -97,13 +115,14 @@ $values = $id_sesiune.','.
         '\''.$site.'\''.','.
         '\''.$game.'\'';
 
-$hash_game=hash('sha256',$values);
+// hash cheie primara gid1.gid2.site.gdate
+$hash_game_pk=hash('sha256',$echipa1_internal.$echipa2_internal.$site.$game_date);
 
-$values = $values.
-          
-$query = 'insert into fotbal(sesiune,echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id_1,game_id_1,hash_joc) values ('.
-        $values.','.
-        '\''.$hash_game.'\''.
+// hash joc comun
+$hash_game_comun=hash('sha256',$echipa1_internal.$echipa2_internal.$site);
+
+$query = 'insert into fotbal(sesiune,echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id_1,game_id_1,hash_joc,hash_joc_comun,echipa1_internal,echipa2_internal,data_joc) values ('.
+        $values.','.'\''.$hash_game_pk.'\','.'\''.$hash_game_comun.'\','.'\''.$echipa1_internal.'\','.'\''.$echipa2_internal.'\','.'\''.$game_date.'\''.
         ')';
 
 echo $query;
@@ -112,8 +131,6 @@ if (mysqli_query($con,$query)) {
 } else {
 	die("Error inserting data ".mysqli_error($con));
 }
-
-
 
 mysqli_close($con);
 

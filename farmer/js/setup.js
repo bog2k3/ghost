@@ -6,7 +6,7 @@
 
 function extension_settings() {
     
-    this.backend_php_server="192.168.0.113";
+    this.backend_php_server="localhost";
     this.backend_php_server_protocol="http";
     this.backend_php_server_port="80";
     
