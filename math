@@ -1,0 +1,29 @@
+Matematica din spate:
+
+K(A):    c1a vs c2a  pereche cote opuse
+K(B):    c1b vs c2b  aceeasi pereche
+
+T = i1+i2
+caz 1: Ct = i1*c1a    >= T
+caz 2: Ct = i2*c2b    >= T
+
+i1*c1a >= i1+i2    | : i1
+i2*c2b >= i1+i2    | : i2
+
+c1a >= 1 + i2/i1
+c2b >= 1 + i1/i2
+
+i1/i2 = r
+                               ---------------------------------
+1/(c1a-1) <= r <= c2b-1    ->  | COND:    c1a*c2b >= c1a+c2b   |
+                               ---------------------------------
+
+sansele pt caz 1 si caz 2 sunt proportionale cu cotele:
+s1/s2 = c1a/c2b = p
+
+Ct = MAX <=> s1*i1*c1a + s2*i2*c2b = MAX
+p*s2*i1*c1a + c2*i2*c2b = MAX
+s2*i2*(p*r*c1a + c2b) = MAX    ---------------------------------------
+=> p = MAX && r = MAX      ->  | MAX:    c1a/c2b = MAX               |
+                               |         i1/i2 = MAX = c2b - 1       |
+                               ---------------------------------------
