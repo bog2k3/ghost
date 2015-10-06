@@ -58,12 +58,12 @@ void faQueryul(SQLSock &socket, std::string tabel) {
 		cupidGameData data;
 		data.internalGameId = res->getString(13);	// TODO - trebuie din coloana hash_joc_comun, nu hash_joc
 		data.gameId = res->getString(11);
-		data.cota1 = res->getDouble(4);
-		data.cota1x = res->getDouble(7);
-		data.cota2 = res->getDouble(5);
-		data.cota2x = res->getDouble(8);
-		data.cota12 = res->getDouble(9);
-		data.cotax = res->getDouble(6);
+		data.cote[pariu::P1] = res->getDouble(4);
+		data.cote[pariu::P1X] = res->getDouble(7);
+		data.cote[pariu::P2] = res->getDouble(5);
+		data.cote[pariu::PX2] = res->getDouble(8);
+		data.cote[pariu::P12] = res->getDouble(9);
+		data.cote[pariu::PX] = res->getDouble(6);
 		data.siteId = res->getString(10);
 
 		gameData.push_back(data);
