@@ -79,12 +79,11 @@ function meci_fotbal() {
     this.upload_to_db = function () {
         
         // se creeaza requestul
-        var s = new extension_settings();
-        
-        http_request = s.backend_php_server_protocol+"://"+
-                       s.backend_php_server+":"+
-                       s.backend_php_server_port+
-                       s.backend_php_server_fotbal+
+
+        http_request = backend_php_server_protocol+"://"+
+                       backend_php_server+":"+
+                       backend_php_server_port+
+                       backend_php_server_fotbal+
                        "?sesiune=1"+
                        "&e1="+this.echipa1+
                        "&e2="+this.echipa2+
