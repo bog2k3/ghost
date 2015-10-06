@@ -24,27 +24,31 @@ bool initializeazaDB(SQLSock &socket, std::string const& URI, std::string const&
 /*
 --------------
 describe fotbal
-------------
-
-+-----------+------------------+------+-----+-------------------+-----------------------------+
-| Field     | Type             | Null | Key | Default           | Extra                       |
-+-----------+------------------+------+-----+-------------------+-----------------------------+
-|  1 sesiune   | int(10) unsigned | NO   |     | NULL              |                             |
-|  2 echipa1   | varchar(32)      | YES  |     | NULL              |                             |
-|  3 echipa2   | varchar(32)      | YES  |     | NULL              |                             |
-|  4 cota_1    | float            | YES  |     | NULL              |                             |
-|  5 cota_2    | float            | YES  |     | NULL              |                             |
-|  6 cota_x    | float            | YES  |     | NULL              |                             |
-|  7 cota_1x   | float            | YES  |     | NULL              |                             |
-|  8 cota_2x   | float            | YES  |     | NULL              |                             |
-|  9 cota_12   | float            | YES  |     | NULL              |                             |
-| 10 site_id_1 | varchar(12)      | YES  |     | NULL              |                             |
-| 11 game_id_1 | varchar(12)      | YES  |     | NULL              |                             |
-| 12 timp      | timestamp        | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP |
-| 13 hash_joc  | varchar(64)      | NO   | PRI |                   |                             |
-+-----------+------------------+------+-----+-------------------+-----------------------------+
-13 rows in set (0.01 sec)
 --------------
+
++------------------+------------------+------+-----+-------------------+-----------------------------+
+| Field            | Type             | Null | Key | Default           | Extra                       |
++------------------+------------------+------+-----+-------------------+-----------------------------+
+| sesiune          | int(10) unsigned | NO   |     | NULL              |                             |
+| echipa1          | varchar(32)      | YES  |     | NULL              |                             |
+| echipa2          | varchar(32)      | YES  |     | NULL              |                             |
+| cota_1           | float            | YES  |     | NULL              |                             |
+| cota_2           | float            | YES  |     | NULL              |                             |
+| cota_x           | float            | YES  |     | NULL              |                             |
+| cota_1x          | float            | YES  |     | NULL              |                             |
+| cota_2x          | float            | YES  |     | NULL              |                             |
+| cota_12          | float            | YES  |     | NULL              |                             |
+| site_id_1        | varchar(12)      | YES  |     | NULL              |                             |
+| game_id_1        | varchar(12)      | YES  |     | NULL              |                             |
+| timp             | timestamp        | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP |
+| hash_joc         | varchar(64)      | NO   | PRI |                   |                             |
+| hash_joc_comun   | varchar(64)      | YES  |     | NULL              |                             |
+| echipa1_internal | varchar(32)      | YES  |     | NULL              |                             |
+| echipa2_internal | varchar(32)      | YES  |     | NULL              |                             |
+| data_joc         | varchar(10)      | YES  |     | NULL              |                             |
+| status_echipe    | int(1)           | YES  |     | NULL              |                             |
++------------------+------------------+------+-----+-------------------+-----------------------------+
+18 rows in set (0.01 sec)
 
  */
 
@@ -56,7 +60,7 @@ void faQueryul(SQLSock &socket, std::string tabel) {
 
 	while (res->next()) {
 		cupidGameData data;
-		data.internalGameId = res->getString(13);	// TODO - trebuie din coloana hash_joc_comun, nu hash_joc
+		data.internalGameId = res->getString(14);
 		data.gameId = res->getString(11);
 		data.cote[pariu::P1] = res->getDouble(4);
 		data.cote[pariu::P1X] = res->getDouble(7);

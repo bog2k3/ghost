@@ -23,7 +23,7 @@ void gasestePerechi() {
 				// am gasit o potentiala pereche (acelasi joc pe 2 site-uri)
 				decltype(pairs) crtPairs;
 				// acum vedem daca sunt cotele bune
-				double raport = 0;
+				 double raport = 0;
 				// verificam toate combinatiile opuse:
 				if (eCombinatie(gameData[i].cote[pariu::P1], gameData[j].cote[pariu::PX2], raport))
 					crtPairs.push_back(cupidPair{i, pariu::P1, j, pariu::PX2, raport});
