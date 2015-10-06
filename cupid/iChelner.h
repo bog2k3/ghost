@@ -16,20 +16,11 @@
  * Pentru fiecare site o sa fie o clasa diferita care implementeaza interfata asta.
  */
 
-enum class Pariu {
-	UNU,
-	UNU_X,
-	DOI,
-	DOI_X,
-	X,
-	UNU_DOI,
-};
-
 class iChelner {
 public:
 	virtual ~iChelner() {}
 
-	virtual bool issueCommand(siteGameId gameId, Pariu pariu, uint32_t suma, uint32_t timeoutMiliseconds) = 0;
+	virtual bool issueCommand(std::string gameId, pariu p, uint32_t suma, uint32_t timeoutMiliseconds) = 0;
 };
 
 #endif /* ICHELNER_H_ */
