@@ -1,4 +1,4 @@
-* [farmare JS] refresh la pagina dupa un interval
+FINALIZAT * [farmare JS] refresh la pagina dupa un interval
 FINALIZAT * [DB] hash_joc e PK, trebuie calculat hash din 4 coloane: echipa1, echipa2, site_id, timp 
 FINALIZAT * [DB] adaugat camp hash_joc_comun, calculat la fel ca hash_joc dar fara site_id - comun intre site-uri, 
 	folosit pt matchuire

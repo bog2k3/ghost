@@ -18,7 +18,7 @@ function meci_fotbal() {
     this.cota_12="";
     this.data="";
     this.cod="";
-
+    this.site="";
     
     this.add_info = function(header,text) {
         switch (header) {
@@ -93,7 +93,7 @@ function meci_fotbal() {
                        "&c1x="+this.cota_1x+
                        "&c2x="+this.cota_2x+
                        "&c12="+this.cota_12+
-                       "&site=stanley"+
+                       "&site="+this.site+
                        "&game_id="+this.cod;
         $.getJSON(http_request,
             function(data) {
