@@ -1,11 +1,13 @@
 /*
  * Data : 30-septembrie-2015
- * Programator : dan
- * 
+ * autor : dan
+ *
+ * Dan : 6-octombrie-2015   : adaugare betcafearena
+ *                          : bug - nu adaugam si data meciului
  */
 
 // stanley
-// TODO : betcafearena
+// betcafearena
 
 function meci_fotbal() {
     
@@ -17,7 +19,7 @@ function meci_fotbal() {
     this.cota_1x="";
     this.cota_2x="";
     this.cota_12="";
-    this.data="";
+    this.data=""; // data trebuie formatata ca pe stanleybet zz/ll/aaaa
     this.cod="";
     this.site="";
     
@@ -49,8 +51,19 @@ function meci_fotbal() {
         
         // data
         // coloana 4
-        // TODO Trebuie formatata
-        data = body[3].innerText.replace(/(\r\n|\n|\r)/gm,"");
+        // scapam de minus animalele nu au fost in stare sa faca si ei o data calumea
+        var data_split = body[3].innerText.replace(/(\r\n|\n|\r)/gm,"").split(' - ');
+        // mai intai imi vine luna apoi ziua si fara an PLM
+        // Return today's date and time
+        var currentTime = new Date()
+
+        
+        var bucati_data = data_split[0].split('/');
+        // daca ziua are o singura cifra adaugam un zero in fata
+        if (bucati_data[1].length == 1) 
+            bucati_data[1] = "0"+bucati_data[1];
+        
+        this.data = bucati_data[1]+"/"+bucati_data[0]+"/"+currentTime.getFullYear();
         
         //trecem la cote
         
@@ -60,11 +73,8 @@ function meci_fotbal() {
         
         for (var header_index = 2;header_index<14;header_index+=2) {
             // coloana 5 prima cota
-            //console.debug(header);
-            //console.debug(header[header_index].childNodes[0]);
-            //console.debug(body);
             
-            switch (header[header_index].innerText.replace(/(\r\n|\n|\r)/gm,"")) {
+            switch (header[header_index].innerText.toLowerCase().replace(/(\r\n|\n|\r)/gm,"")) {
                 case "1":
                     this.cota_1=body[header_index+3].innerText.replace(/(\r\n|\n|\r)/gm,"");
                     break;
@@ -123,13 +133,13 @@ function meci_fotbal() {
                 var echipe;
                 
                 // primele 16 caractere reprezinta data
-                data = text.replace(/(\r\n|\n|\r)/gm,"").slice(0,16);
+                data = text.replace(/(\r\n|\n|\r)/gm,"").split(" ");
                 
                 //restul echipele
                 //echipele se impart dupa :
                 echipe = text.replace(/(\r\n|\n|\r)/gm,"").slice(16).split(":");
                 
-                this.data=data;
+                this.data=data[0];
                 this.echipa1=echipe[0];
                 this.echipa2=echipe[1];
                 break;
@@ -165,7 +175,9 @@ function meci_fotbal() {
                        "&c2x="+this.cota_2x+
                        "&c12="+this.cota_12+
                        "&site="+this.site+
-                       "&game_id="+this.cod;
+                       "&game_id="+this.cod+
+                       "&game_date="+this.data
+                        ;
         $.getJSON(http_request,
             function(data) {
                 return;

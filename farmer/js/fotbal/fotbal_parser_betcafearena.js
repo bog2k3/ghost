@@ -1,3 +1,8 @@
+/*
+ * Data : 6-octombrie-2015
+ * autor : dan
+ */
+
 //http://www.betcafearena.ro/pariuri-sportive/fotbal  - de aici se porneste
 
 var getBetcafearena_Fotbal = function  () {
@@ -62,7 +67,10 @@ var getBetcafearena_Fotbal = function  () {
                                 var meci = new meci_fotbal();
                                 
                                 meci.add_info_betcafearena(header_tablel,tbody.childNodes);
-                                console.debug(meci.to_text());
+                                if (enable_debug==true)
+                                    console.debug(meci.to_text());
+                                meci.upload_to_db();
+                                
                             }
                         );
                         

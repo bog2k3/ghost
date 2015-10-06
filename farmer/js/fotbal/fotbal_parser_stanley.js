@@ -1,3 +1,11 @@
+/*
+ * Data : 30-septembrie-2015
+ * autor : dan
+ */
+
+// http://www.stanleysports.ro/oferta.php?f=fotbal&z=1 - aici incepem
+
+
 var getStanley_Fotbal = function  () {        
         
         //console.debug("listener fired.");
@@ -56,7 +64,8 @@ var getStanley_Fotbal = function  () {
                             } 
                         }
                         
-                        //console.debug(meci_fotbal_rec.to_text());
+                        if (enable_debug==true)
+                            console.debug(meci_fotbal_rec.to_text());
                         //console.debug(meci_fotbal_rec.upload_to_db());
                         meci_fotbal_rec.upload_to_db();
 

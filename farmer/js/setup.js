@@ -1,6 +1,6 @@
 /*
  * Data : 1-octombrie-2015
- * Programator : dan
+ * autor : dan
  * 
  */
 
@@ -10,3 +10,4 @@
  var backend_php_server_fotbal="/php/insert_fotbal.php";
  var farmer_online=false;
  var refresh_rate=10000;//1 min
+ var enable_debug=true; // pentru afisare in consola

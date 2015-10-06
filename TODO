@@ -5,7 +5,12 @@ FINALIZAT * [DB] adaugat camp hash_joc_comun, calculat la fel ca hash_joc dar fa
 FINALIZAT * [farmare PHP] query pe DB daca exista deja inregistrarea cu acelasi PK, daca da ? update : insert
 FINALIZAT * [DB] cand fac query sa-mi vina grupate inregistrarile cu acelasi hash_joc_comun una dupa alta, ca sa fac
 	matchuirea mai rapid
-* [farmare] !!! tre sa stergem din DB meciurile care au expirat !!!
-* [DB] adaugat tabela de dictionar pentru meciuri (si populata :)) )
+FINALIZAT * [farmare] !!! tre sa stergem din DB meciurile care au expirat !!!
+FINALIZAT * [farmare] adaugare site2
+
+* [farmare] adaugare site3
+
+FINALIZAT * [DB] adaugat tabela de dictionar pentru meciuri
+* [DB] adaugat date in dictionare pentru a face primele meciuri
 * [DB] adaugat tabela de erori
 
