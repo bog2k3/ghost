@@ -3,6 +3,7 @@
  *
  *  Created on: Apr 8, 2015
  *      Author: bog
+ *  data : 06-octombrie-2015 : Dan : adaugare sortare 
  */
 
 #include "SQLSock.h"
@@ -48,7 +49,10 @@ describe fotbal
  */
 
 void faQueryul(SQLSock &socket, std::string tabel) {
-	auto res = socket.doQuery("select * from " + tabel);
+
+	// am adaugat ordonare, acum meciurile ce au acelasi hash comun vin unele dupa celelalte
+
+	auto res = socket.doQuery("select * from " + tabel+ " order by hash_joc_comun");
 
 	while (res->next()) {
 		cupidGameData data;

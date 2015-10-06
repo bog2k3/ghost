@@ -2,10 +2,10 @@
 FINALIZAT * [DB] hash_joc e PK, trebuie calculat hash din 4 coloane: echipa1, echipa2, site_id, timp 
 FINALIZAT * [DB] adaugat camp hash_joc_comun, calculat la fel ca hash_joc dar fara site_id - comun intre site-uri, 
 	folosit pt matchuire
-* [farmare PHP] query pe DB daca exista deja inregistrarea cu acelasi PK, daca da ? update : insert
-* [DB] cand fac query sa-mi vina grupate inregistrarile cu acelasi hash_joc_comun una dupa alta, ca sa fac
+FINALIZAT * [farmare PHP] query pe DB daca exista deja inregistrarea cu acelasi PK, daca da ? update : insert
+FINALIZAT * [DB] cand fac query sa-mi vina grupate inregistrarile cu acelasi hash_joc_comun una dupa alta, ca sa fac
 	matchuirea mai rapid
 * [farmare] !!! tre sa stergem din DB meciurile care au expirat !!!
-[DB] adaugat tabela de dictionar pentru meciuri (si populata :)) )
-[DB] adaugat tabela de erori
+* [DB] adaugat tabela de dictionar pentru meciuri (si populata :)) )
+* [DB] adaugat tabela de erori
 
