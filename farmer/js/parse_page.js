@@ -9,11 +9,23 @@ var getTableContent = function  (page_URL) {
             //console.debug(""+page_URL);
             
             getStanley_Fotbal();
+            if (farmer_online==true) {
+                //refresh page
+                setTimeout('',refresh_rate);
+                window.location.reload();
+            }
+        }
+        
+        if (page_URL.toLowerCase().indexOf("www.betcafearena.ro/") > 0) {
             
-            //refresh page
-            // treaba asta merge doar daca tabul este activ
-            setTimeout('',refresh_rate);
-            window.location.reload();
+            console.debug(""+page_URL);
+            
+            getBetcafearena_Fotbal();
+            if (farmer_online==true) {
+                //refresh page
+                setTimeout('',refresh_rate);
+                window.location.reload();
+            }
         }
 }
 

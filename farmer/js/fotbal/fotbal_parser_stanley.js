@@ -3,10 +3,11 @@ var getStanley_Fotbal = function  () {
         //console.debug("listener fired.");
         
         // pentru stanley bet
+        // meciurile sunt in tabele ce au clasa pariu
         
         var query = document.querySelectorAll('table.pariu');
         
-        console.debug(query.length);
+        //console.debug(query.length);
         
         
         [].forEach.call( query, 
@@ -33,17 +34,18 @@ var getStanley_Fotbal = function  () {
                         var meci_fotbal_rec = new meci_fotbal();
                         
                         for (var j=0,n_tbody=tbody.length;j<n_tbody;j++) {
-                            if (tbody[i].nodeName.toLowerCase() == "tr") {
+                            // aici era i
+                            if (tbody[j].nodeName.toLowerCase() == "tr") {
                                 // pe tr se gasesc toate informatiile despre meci in copii de tip td
-                                
-                                var informatii_meci = tbody[i].childNodes;
+                                // 
+                                // aici era tot i 
+                                var informatii_meci = tbody[j].childNodes;
                                 
                                 
                                 [].forEach.call(informatii_meci,
                                     function(meci){
                                         if (meci.className) {
-                                            meci_fotbal_rec.add_info(meci.className,meci.innerText);
-                                            meci_fotbal_rec.site = "STANLEY";
+                                            meci_fotbal_rec.add_info_stanley(meci.className,meci.innerText);
                                         }
                                 });
                                 
