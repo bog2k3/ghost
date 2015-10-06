@@ -36,10 +36,21 @@ struct cupidSiteData {
 	// ...
 };
 
+enum class pariu {
+	P1,
+	P1X,
+	PX,
+	PX2,
+	P2,
+	P12,
+};
+
 struct cupidPair
 {
 	unsigned index1;	// pereche de indexi in vectorul de jocuri pentru o meciuire.
+	pariu p1;
 	unsigned index2;
+	pariu p2;
 	double ratio;		// raportul in care trebuie pariat (ratio = suma1 / suma2) pentru profit maxim
 };
 

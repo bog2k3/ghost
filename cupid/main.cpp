@@ -14,7 +14,7 @@
 
 std::vector<cupidGameData> gameData;
 std::vector<cupidPair> pairs;
-std::map<siteId, cupidSiteData> mapSites;
+std::map<std::string, cupidSiteData> mapSites;
 
 void parseConfigFile(cmdLineOptions &opts);
 void initializeazaChelneri();
