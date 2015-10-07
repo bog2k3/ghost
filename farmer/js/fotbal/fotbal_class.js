@@ -55,7 +55,7 @@ function meci_fotbal() {
         var data_split = body[3].innerText.replace(/(\r\n|\n|\r)/gm,"").split(' - ');
         // mai intai imi vine luna apoi ziua si fara an PLM
         // Return today's date and time
-        var currentTime = new Date()
+        var currentTime = new Date();
 
         
         var bucati_data = data_split[0].split('/');

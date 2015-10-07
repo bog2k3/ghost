@@ -5,6 +5,34 @@
 
 //http://www.betcafearena.ro/pariuri-sportive/fotbal  - de aici se porneste
 
+var changeBetcafearena_day = function ( day ) {
+    
+    console.debug(day);
+    
+    // in divul event days se afla hrefurile cu zilele
+    var butoane_zile_main_div = document.querySelectorAll('div.events_days');
+    
+    // primul div reprezinta grupul de butoane
+    var button_group = butoane_zile_main_div[0];
+    
+    // din div se cauta elementul UL
+    var ul_button_group = button_group.childNodes[1];
+    
+    // din ul se extrag li'urile
+    var li_button_group = ul_button_group.childNodes[1];
+    
+    // se extrage butonul dorit si se apasa pe el
+    // din nou mai intai apar mizerii #text in fata deci inmultesc cu 2
+    var butoane_zile = li_button_group.childNodes[(day*2)+1].childNodes[0];
+    
+    setTimeout(function() {
+        butoane_zile.click();
+    },3000);
+    
+    
+
+}
+
 var getBetcafearena_Fotbal = function  () {
     
     
