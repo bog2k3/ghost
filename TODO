@@ -13,4 +13,4 @@ FINALIZAT * [farmare] adaugare site2
 FINALIZAT * [DB] adaugat tabela de dictionar pentru meciuri
 * [DB] adaugat date in dictionare pentru a face primele meciuri
 * [DB] adaugat tabela de erori
-
+* [DB] adaugat tabela in care se stocheaza match'urile
