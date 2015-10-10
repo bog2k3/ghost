@@ -5,6 +5,22 @@
 
 // http://www.stanleysports.ro/oferta.php?f=fotbal&z=1 - aici incepem
 
+var changeStanley_day = function ( day ) {
+    
+    console.debug(day);
+    
+    // se extrag butoanele de zile
+    var butoane_zile_main_div = document.getElementById("menu4");
+    
+    // primul element din lista e un text si ultimul lafel asa ca incepem la +1
+    var buton = butoane_zile_main_div.childNodes[day+1];
+    
+    // click pe fraier
+    setTimeout(function() {
+        buton.click();
+    },3000);
+}
+
 
 var getStanley_Fotbal = function  () {        
         

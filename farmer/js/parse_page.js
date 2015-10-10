@@ -6,15 +6,33 @@ var getTableContent = function  (page_URL) {
         
         if (page_URL.toLowerCase().indexOf("www.stanleysports.ro/") > 0)
         {
-            //console.debug(""+page_URL);
-            
+
             getStanley_Fotbal();
             
-            if (farmer_online==true) {
-                //refresh page
-                setTimeout('',refresh_rate);
-                window.location.reload();
-            }
+            chrome.runtime.sendMessage({site: "STANLEYBET"}, function(response) {
+                
+                if (response.refresh == "true" ) {
+                    //console.debug("trebuie refresh");
+                        
+                    if (farmer_online==true) {
+                        
+                        //refresh page
+                        
+                        setTimeout(function() {
+                                changeStanley_day(response.day);
+                        },refresh_rate);
+                    }
+                } else {
+                    
+                    //console.debug("nu trebuie refresh");
+                    
+                    if (response.day!=0)
+                        changeStanley_day(response.day);
+                }
+                
+                
+            });
+            
         }
         
         if (page_URL.toLowerCase().indexOf("www.betcafearena.ro/") > 0) {

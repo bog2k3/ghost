@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener(
 function(message,sender,sendResponse){
     
     // verificam de pe ce tab a venit mesajul
-    if (message.site = "BETCAFEARENA") {
+    if (message.site === "BETCAFEARENA") {
         betcafearena_day++;
         if (betcafearena_day > 8) {
             betcafearena_day=0;
@@ -37,7 +37,16 @@ function(message,sender,sendResponse){
         } else {
             sendResponse({refresh:"false",day:betcafearena_day});
         }
-    }
+    } else
+    if (message.site === "STANLEYBET") {
+        stanleybet_day++;
+        if (stanleybet_day > 6) {
+            stanleybet_day=0;
+            sendResponse({refresh:"true",day:stanleybet_day});
+        } else {
+            sendResponse({refresh:"false",day:stanleybet_day});
+        }
+    } 
     
     // TODO set refresh si pentru stanley
 });
