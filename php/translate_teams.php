@@ -11,7 +11,13 @@
     //TODO : implementare sporturi 
     // momentan merge doar pe fotbal
     
-    function print_untranslated_teams($con,$sport) {
+    function print_untranslated_teams($sport) {
+        
+        $con = mysqli_connect($servername,$username,$password,$database,$database_port);
+
+        if (!$con) {
+            die("Connection failed: " . mysqli_error($con));
+        }
         
         $query = "select * from ( ".
                  " select echipa1 as echipa,site_id_1 as site from fotbal where status_echipe in (1,3) "
@@ -44,16 +50,26 @@
         
         $html .= '</table>';
         
-        echo $html;
         mysqli_free_result($query);
+        mysqli_close($con);
+        return $html;
+    }
+    
+    function add_inputs() {
         
+        $html = "Site : <input type='text' id='site'> <br> Echipa : <input type='text' id='echipa'>";
+        
+        return $html;
     }
     
-    $con = mysqli_connect($servername,$username,$password,$database,$database_port);
-
-    if (!$con) {
-            die("Connection failed: " . mysqli_error($con));
-    }
     
-    print_untranslated_teams($con,'fotbal');
+    
+    echo "<div style='width:100%;'>".
+         "<div style='float:left;width:60%'>".
+            print_untranslated_teams('fotbal').
+          "</div>".
+          "<div style='float:left;width:40%'>".
+            add_inputs().
+          "</div>".
+          "</div>";
 ?>

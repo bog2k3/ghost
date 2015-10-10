@@ -26,6 +26,6 @@
     }
     
     mysqli_free_result($query);
-    
+    mysqli_close($con);
     echo $date;
 ?>

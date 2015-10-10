@@ -204,7 +204,8 @@
         echo $query;
         die("Error inserting data ".mysqli_error($con));
     }
-
+    
+    mysqli_free_result($query);
     mysqli_close($con);
 
 ?>
