@@ -2,3 +2,6 @@
 .formLabel, .formInput {
         display:inline-block;   
 }
+
+tr { cursor: default; }
+.highlight { background: yellow; }

@@ -4,9 +4,11 @@
             Creat: DAN
             Data : 1-octombrie-2015
             Data : 6-octombrie-2015 : Verificare existenta hash pentru insert/update
+            Data : 10-octombrie-2015 : mutat functia de verificare existenta traducere
     */
 
     include 'database_setup.php';
+    include 'helper_functions.php';
 
     /**********************************************
             structura tabel
@@ -32,25 +34,7 @@
             status_echipe           - int(1) - valori posibile 0 - echipele exista in DD 1 - echipa1 nu exista 2-echipa2 nu exista 3-niciuna din echipe nu exista
     ************************************************/
 
-    function    getInternalTeam($connection,$team,$site) {
-                
-        $query = 'select echipa_internal from fotbal_dict where'.
-                 'site = \''.$site.'\' and echipa = \''.$team.'\'';
-        
-        $result = mysqli_query($connection,$query);
-        
-        $RETURN_VALUE;
-
-        if (mysqli_num_rows($result) > 0) {
-            
-             if (($row = mysqli_fetch_assoc($result))) {
-                 
-                 $RETURN_VALUE =  $row["echipa_internal"];
-             }
-        }        
-        mysqli_free_result($query);
-        return $RETURN_VALUE;
-    }
+    
     
     /**
      * echipa1_internal si echipa2_internal sunt echipele traduse 
