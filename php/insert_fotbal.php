@@ -38,23 +38,18 @@
                  'site = \''.$site.'\' and echipa = \''.$team.'\'';
         
         $result = mysqli_query($connection,$query);
-
+        
+        $RETURN_VALUE;
 
         if (mysqli_num_rows($result) > 0) {
             
              if (($row = mysqli_fetch_assoc($result))) {
                  
-                 return $row["echipa_internal"];
+                 $RETURN_VALUE =  $row["echipa_internal"];
              }
-             else {
-                return "";
-             }
-             
-        } else {
-            
-            return "";
-            
-        }
+        }        
+        mysqli_free_result($query);
+        return $RETURN_VALUE;
     }
     
     /**
