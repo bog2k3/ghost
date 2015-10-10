@@ -18,14 +18,14 @@
     // pastram o zi in plus datele
     // format data zz/ll/aaaa
     $query = 'delete from fotbal where STR_TO_DATE(data_joc,\'%d/%m/%Y\') < CURDATE()';
-    if (mysqli_query($con,$query)) {
+    if ($result = mysqli_query($con,$query)) {
         
     } else {
         echo $query;
         die("Error deleting data ".mysqli_error($con));
     }
     
-    mysqli_free_result($query);
+    mysqli_free_result($result);
     mysqli_close($con);
     echo $date;
 ?>

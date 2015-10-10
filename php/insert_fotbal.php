@@ -198,14 +198,14 @@
 
     //echo $query;
 
-    if (mysqli_query($con,$query)) {
+    if (($result = mysqli_query($con,$query))) {
 
     } else {
         echo $query;
         die("Error inserting data ".mysqli_error($con));
     }
     
-    mysqli_free_result($query);
+    mysqli_free_result($result);
     mysqli_close($con);
 
 ?>
