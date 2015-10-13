@@ -34,6 +34,7 @@
 #define __MEMORY_MAPPED_FILE_POSIX_H__
 
 #include <fcntl.h>
+#include <unistd.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
