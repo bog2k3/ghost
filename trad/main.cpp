@@ -6,6 +6,7 @@
  */
 
 
+#include "../cpplib/log.h"
 #include <iostream>
 #include <locale>
 #include <string>
@@ -29,10 +30,40 @@ void retrieve(
     std::wcout << std::endl;
 }
 
+bool parseCmdLine(int argc, char* argv[], std::string &out_sport, std::vector<std::string> &out_nume) {
+	bool sportParamExist = false;
+	for (int i=1; i<argc; i++) {
+		if (!strcmp(argv[i], "--sport")) {
+			if (i == argc-1) {
+				ERROR("Așteptam un argument dupa '--sport' !!!");
+				return false;
+			}
+			out_sport = argv[++i];
+			sportParamExist = true;
+			i++;
+		}
+		else
+			out_nume.push_back(argv[i]);
+	}
+	if (!sportParamExist)
+		ERROR("Lipsește parametrul '--sport' !!!");
+	return sportParamExist;
+}
+
 int main(int argc, char* argv[]) {
-	// Activate std::wcout.
 	std::locale::global(std::locale(""));
-	std::wcout.imbue(std::locale(""));
+	std::cout.imbue(std::locale(""));
+
+	std::string sport;
+	std::vector<std::string> nume;
+	if (!parseCmdLine(argc, argv, sport, nume)) {
+		ERROR("Sintaxa liniei de comanda este proasta!\n" <<
+				"Exemplu bun: \n" <<
+				"trad --sport fotbal \"Echipa unu\" \"echipa doi\" ...\n");
+		return -1;
+	}
+
+	if (!loadListe())
 
 	// Open a SimString database for writing (with std::wstring).
 	simstring::ngram_generator gen(3, false);

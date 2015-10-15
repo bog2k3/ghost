@@ -15,13 +15,12 @@
 #include <iostream>
 #include <string>
 
-#define LOGGER(NAME) logger logger_token(NAME)
 #define LOGPREFIX(PREF) logger_prefix logger_prefix_token(PREF);
 
-#define LOG(X) { logger::getCurrent()->writeprefix(std::cout); std::cout << X; }
+#define LOG(X) { logger::writeprefix(std::cout); std::cout << X; }
 #define LOGNP(X) std::cout << X
 #define LOGLN(X) LOG(X << "\n")
-#define ERROR(X) { std::cerr << "[ERROR]"; logger::getCurrent()->writeprefix(std::cerr); std::cerr << X << "\n"; }
+#define ERROR(X) { std::cerr << "[ERROR]"; logger::writeprefix(std::cerr); std::cerr << X << "\n"; }
 
 #else
 #define LOG(X)
@@ -36,19 +35,14 @@
 
 class logger {
 public:
-	logger(std::string name) : name(name) { loggers.push(this); }
-	~logger() { loggers.pop(); }
-
-	static logger* getCurrent() { return loggers.empty() ? nullptr : loggers.top(); }
-	void writeprefix(std::ostream &stream) const;
+	static void writeprefix(std::ostream &stream);
 
 private:
-	std::string name;
-	std::deque<std::string> prefix;
-	static std::stack<logger*> loggers;
+	static std::deque<std::string> prefix_;
+	static logger instance_;
 
-	void push_prefix(std::string prefix) { this->prefix.push_back(prefix); }
-	void pop_prefix() { this->prefix.pop_back(); }
+	static void push_prefix(std::string prefix) { prefix_.push_back(prefix); }
+	static void pop_prefix() { prefix_.pop_back(); }
 
 	friend class logger_prefix;
 };
@@ -56,10 +50,10 @@ private:
 class logger_prefix {
 public:
 	logger_prefix(std::string s) {
-		logger::getCurrent()->push_prefix(s);
+		logger::push_prefix(s);
 	}
 	~logger_prefix() {
-		logger::getCurrent()->pop_prefix();
+		logger::pop_prefix();
 	}
 };
 
