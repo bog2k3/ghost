@@ -10,7 +10,6 @@
 #include <iostream>
 #include <locale>
 #include <string>
-#include <simstring/simstring.h>
 
 void retrieve(
     simstring::reader& dbr,
