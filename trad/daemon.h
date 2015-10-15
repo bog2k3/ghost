@@ -31,7 +31,13 @@ public:
 private:
 	std::string listaPath_;
 	simstring::ngram_generator ngramGenerator_;
-	std::map<std::string, std::shared_ptr<simstring::reader>> dbReaders_;	// maps sport names to db readers (which take a single sport-specific list file as input)
+
+	struct sportData {
+		std::shared_ptr<simstring::reader> dbReader;
+		std::map<std::string, std::string> alternateNameMap;
+	};
+
+	std::map<std::string, sportData> sportData_;	// maps sport names to db readers (which take a single sport-specific list file as input) & alternate name mappings
 
 	void loadCache();
 	void reloadCacheFile(std::string const& path);

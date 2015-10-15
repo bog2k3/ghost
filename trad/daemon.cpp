@@ -26,8 +26,10 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 
 void Daemon::reloadCacheFile(std::string const& path) {
 	std::string sportName = stripExt(getFileName(path));
-	dbReaders_[sportName] = std::make_shared<simstring::reader>();
-	dbReaders_[sportName]->open(path);
+	sportData_[sportName].dbReader = std::make_shared<simstring::reader>();
+	sportData_[sportName].dbReader->open(path);
+
+	// TODO copiat lista in directorul de cache si incarcat alternateMap din ea
 }
 
 void Daemon::loadCache() {
@@ -38,7 +40,13 @@ void Daemon::loadCache() {
 }
 
 void Daemon::updateCacheFile(std::string const& listPath, std::string const& cachePath) {
+	simstring::writer_base<std::string> dbw(ngramGenerator_, cachePath);
 
+	dbw.insert(L"Concordia Chiajna");
+
+	dbw.close();
+
+	reloadCacheFile(cachePath);
 }
 
 void Daemon::refreshCache() {
