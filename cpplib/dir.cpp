@@ -31,8 +31,13 @@ bool pathExists(std::string const& path) {
 	return stat(path.c_str(), &fileInfo) == 0;
 }
 
-void mkDir(std::string const& path) {
-	mkdir(path.c_str(), S_IRWXU);
+bool mkDir(std::string const& path) {
+	LOGPREFIX("mkDir");
+	if (mkdir(path.c_str(), S_IRWXU) < -1) {
+		ERROR(errno << ": Nu am putut crea directorul \"" << path << "\"");
+		return false;
+	}
+	return true;
 }
 
 std::string getFileName(std::string const& path) {
@@ -44,6 +49,10 @@ std::string getFileName(std::string const& path) {
 
 std::string stripExt(std::string const& path) {
 	return path.substr(0, path.find_last_of('.'));
+}
+
+std::string getFileExt(std::string const& path) {
+	return path.substr(path.find_last_of('.'));
 }
 
 unsigned long getFileTimestamp(std::string const& path) {

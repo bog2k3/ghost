@@ -14,8 +14,12 @@
 
 //#define ENABLE_COSINE_MATCHING
 
-static const std::string DATAPATH = "~/.maimutza/";
-static const std::string CACHEPATH = DATAPATH + "cache/";
+std::string getDataPath() {
+	return std::string(getenv("HOME")) + "/.maimutza/";
+}
+std::string getCachePath() {
+	return getDataPath() + "cache/";
+}
 
 Daemon::Daemon(std::string const& listePath)
 	: pathListe_(listePath)
@@ -28,6 +32,12 @@ Daemon::Daemon(std::string const& listePath)
 std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std::string const& sport) {
 	std::vector<std::string> ret;
 
+	if (sportData_[sport].dbReader == nullptr) {
+		ERROR("Nu exista lista pentru " << sport);
+		std::fill_n(ret.begin(), nume.size(), "NECUNOSCUT");
+		return ret;
+	}
+
 	for (int i=0; i<nume.size(); i++) {
 		// Retrieve similar strings into a string vector.
 		std::vector<std::string> xstrs;
@@ -38,7 +48,7 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 			sportData_[sport].dbReader->retrieve(nume[i], simstring::overlap, thresh, std::back_inserter(xstrs));
 			if (xstrs.size() > 1)
 				thresh += 0.03f;
-		} while (xstrs.size() > 1);
+		} while (xstrs.size() > 1 && thresh < 0.9f);
 #ifdef ENABLE_COSINE_MATCHING
 		if (!xstrs.size()) {
 			// try cosine dist:
@@ -87,9 +97,10 @@ void Daemon::reloadCacheFile(std::string const& path) {
 }
 
 void Daemon::loadCache() {
-	std::vector<std::string> cacheFiles = getFiles(CACHEPATH);
+	std::vector<std::string> cacheFiles = getFiles(getCachePath());
 	for (auto f : cacheFiles) {
-		reloadCacheFile(f);
+		if (getFileExt(f) == ".db")
+			reloadCacheFile(f);
 	}
 }
 
@@ -125,12 +136,19 @@ void Daemon::updateCacheFile(std::string const& listPath, std::string const& cac
 }
 
 void Daemon::refreshCache() {
+	// verificam daca exista directorul de cache:
+	if (!pathExists(getDataPath()))
+		if (!mkDir(getDataPath()))
+			return;
+	if (!pathExists(getCachePath()))
+		if (!mkDir(getCachePath()))
+			return;
 	std::vector<std::string> listFiles = getFiles(pathListe_);
 	for (auto f : listFiles) {
 		if (isDir(f))
 			continue;
 		// check if list cache exists and is up-to-date with the file:
-		std::string cachePath = CACHEPATH + stripExt(getFileName(f)) + ".db";
+		std::string cachePath = getCachePath() + stripExt(getFileName(f)) + ".db";
 		bool cacheNeedsUpdate = false;
 		if (!pathExists(cachePath))
 			cacheNeedsUpdate = true;

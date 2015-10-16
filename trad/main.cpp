@@ -25,7 +25,6 @@ bool parseCmdLine(int argc, char* argv[],
 			}
 			out_sport = argv[++i];
 			sportParamExist = true;
-			i++;
 		}
 		else if (!strcmp(argv[i], "--lpath")) {
 			if (i == argc-1) {
@@ -33,7 +32,6 @@ bool parseCmdLine(int argc, char* argv[],
 				return false;
 			}
 			out_listePath = argv[++i];
-			i++;
 		}
 		else
 			out_nume.push_back(argv[i]);
