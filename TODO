@@ -21,4 +21,5 @@
 * [cupid] alegem varianta cea mai buna de pereche dintre acelasi meci de pe mai mult de 2 site-uri.
 	* pe siteurile respective nu mai punem meciul ala (decat o data)
 	* daca mai exista alte perechi (pe alte siteuri) pe acelasi meci, alegem din nou cea mai buna si repetam
+* [maimutza] verificat daca exista u19, u21 etc in input si adaugat inapoi in output
 
