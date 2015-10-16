@@ -29,7 +29,7 @@ public:
 	void refreshCache();
 
 private:
-	std::string listaPath_;
+	std::string pathListe_;
 	simstring::ngram_generator ngramGenerator_;
 
 	struct sportData {

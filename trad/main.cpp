@@ -6,30 +6,16 @@
  */
 
 
+#include "daemon.h"
 #include "../cpplib/log.h"
 #include <iostream>
 #include <locale>
 #include <string>
 
-void retrieve(
-    simstring::reader& dbr,
-    const std::wstring& query,
-    int measure,
-    double threshold
-    )
-{
-    // Retrieve similar strings into a string vector.
-    std::vector<std::wstring> xstrs;
-    dbr.retrieve(query, measure, threshold, std::back_inserter(xstrs));
-
-    // Output the retrieved strings separated by ", ".
-    for (int i = 0;i < (int)xstrs.size();++i) {
-        std::wcout << xstrs[i] << L"\n";
-    }
-    std::wcout << std::endl;
-}
-
-bool parseCmdLine(int argc, char* argv[], std::string &out_sport, std::vector<std::string> &out_nume) {
+bool parseCmdLine(int argc, char* argv[],
+		std::string &out_sport,
+		std::string &out_listePath,
+		std::vector<std::string> &out_nume) {
 	bool sportParamExist = false;
 	for (int i=1; i<argc; i++) {
 		if (!strcmp(argv[i], "--sport")) {
@@ -39,6 +25,14 @@ bool parseCmdLine(int argc, char* argv[], std::string &out_sport, std::vector<st
 			}
 			out_sport = argv[++i];
 			sportParamExist = true;
+			i++;
+		}
+		else if (!strcmp(argv[i], "--lpath")) {
+			if (i == argc-1) {
+				ERROR("Așteptam un argument după '--lpath' !!!");
+				return false;
+			}
+			out_listePath = argv[++i];
 			i++;
 		}
 		else
@@ -54,38 +48,20 @@ int main(int argc, char* argv[]) {
 	std::cout.imbue(std::locale(""));
 
 	std::string sport;
+	std::string listePath = ".";
 	std::vector<std::string> nume;
-	if (!parseCmdLine(argc, argv, sport, nume)) {
+	if (!parseCmdLine(argc, argv, sport, listePath, nume)) {
 		ERROR("Sintaxa liniei de comanda este proasta!\n" <<
 				"Exemplu bun: \n" <<
-				"trad --sport fotbal \"Echipa unu\" \"echipa doi\" ...\n");
+				"trad --sport fotbal [--lpath path] \"Echipa unu\" \"echipa doi\" ...\n");
 		return -1;
 	}
 
-	if (!loadListe())
+	Daemon daemon(listePath);
 
-	// Open a SimString database for writing (with std::wstring).
-	simstring::ngram_generator gen(3, false);
-	simstring::writer_base<std::wstring> dbw(gen, "sample_unicode.db");
-	dbw.insert(L"Concordia Chiajna");
-	dbw.insert(L"concordia chiajna");
-	dbw.insert(L"fcm braila");
-	dbw.insert(L"fc municipal buzau");
-	dbw.insert(L"buzau");
-
-	dbw.insert(L"Steaua Resita");
-	dbw.insert(L"Steaua Moscova");
-	dbw.insert(L"Dinamo Bucuresti");
-	dbw.insert(L"Rapid Bucuresti");
-	dbw.insert(L"Sportul Studentesc Bucuresti");
-	dbw.close();
-
-	// Open the database for reading.
-	simstring::reader dbr;
-	dbr.open("sample_unicode.db");
-
-	// Output similar strings from Unicode queries.
-	retrieve(dbr, L"fcm buzau", simstring::overlap, 0.5);
+	auto traduse = daemon.match(nume, sport);
+	for (int i=0; i<traduse.size(); i++)
+		std::cout << traduse[i] << "\n";
 
 	return 0;
 }
