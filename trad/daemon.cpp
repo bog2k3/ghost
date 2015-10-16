@@ -34,7 +34,7 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 
 	if (sportData_[sport].dbReader == nullptr) {
 		ERROR("Nu exista lista pentru " << sport);
-		std::fill_n(ret.begin(), nume.size(), "NECUNOSCUT");
+		ret.assign(nume.size(), "NECUNOSCUT");
 		return ret;
 	}
 
