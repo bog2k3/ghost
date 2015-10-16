@@ -11,6 +11,7 @@
 #include "../cpplib/split.h"
 #include "../cpplib/assert.h"
 #include <fstream>
+#include <algorithm>
 
 //#define ENABLE_COSINE_MATCHING
 
@@ -39,13 +40,33 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 	}
 
 	for (int i=0; i<nume.size(); i++) {
+		std::string crt = nume[i];
+		std::transform(crt.begin(), crt.end(), crt.begin(), ::tolower);
+		bool u19 = false, u21 = false;
+		size_t u19pos = 0, u21pos = 0;
+		if ((u19pos = crt.find("u19")) != crt.npos) {
+			u19 = true;
+			crt = crt.substr(0, u19pos) + crt.substr(u19pos+3);
+		}
+		if ((u19pos = crt.find("u 19")) != crt.npos) {
+			u19 = true;
+			crt = crt.substr(0, u19pos) + crt.substr(u19pos+4);
+		}
+		if ((u21pos = crt.find("u21")) != crt.npos) {
+			u21 = true;
+			crt = crt.substr(0, u21pos) + crt.substr(u21pos+3);
+		}
+		if ((u21pos = crt.find("u 21")) != crt.npos) {
+			u21 = true;
+			crt = crt.substr(0, u21pos) + crt.substr(u21pos+4);
+		}
 		// Retrieve similar strings into a string vector.
 		std::vector<std::string> xstrs;
 		float thresh = 0.5f;
 		// try overlap first:
 		do {
 			xstrs.clear();
-			sportData_[sport].dbReader->retrieve(nume[i], simstring::overlap, thresh, std::back_inserter(xstrs));
+			sportData_[sport].dbReader->retrieve(crt, simstring::overlap, thresh, std::back_inserter(xstrs));
 			if (xstrs.size() > 1)
 				thresh += 0.03f;
 		} while (xstrs.size() > 1 && thresh < 0.9f);
@@ -55,15 +76,20 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 			thresh = 0.5f;
 			do {
 				xstrs.clear();
-				sportData_[sport].dbReader->retrieve(nume[i], simstring::cosine, thresh, std::back_inserter(xstrs));
+				sportData_[sport].dbReader->retrieve(crt, simstring::cosine, thresh, std::back_inserter(xstrs));
 				if (xstrs.size() > 1)
 					thresh += 0.03f;
 			} while (xstrs.size() > 1);
 		}
 #endif
-		if (xstrs.size())
-			ret.push_back(sportData_[sport].alternateNameMap[xstrs[0]]);
-		else
+		if (xstrs.size()) {
+			std::string numeStd = sportData_[sport].alternateNameMap[xstrs[0]];
+			if (u19)
+				numeStd += " U19";
+			if (u21)
+				numeStd += " U21";
+			ret.push_back(numeStd);
+		} else
 			ret.push_back("NECUNOSCUT");
 	}
 	assert(ret.size() == nume.size());
