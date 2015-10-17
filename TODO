@@ -8,14 +8,15 @@
 	FINALIZAT * [farmare] !!! tre sa stergem din DB meciurile care au expirat !!!
 	FINALIZAT * [farmare] adaugare site2
 
-* [DB] TRADUCERI ECHIPE !!!
+* [PHP] bagat maimutza in schema pentru TRADUCERI ECHIPE !!!
+* [PHP] implementat trimis email pentru echipe care nu pot fi traduse ('NECUNOSCUT')
+* [vi] scris liste echipe/jucatori pentru maimutza
 * [PHP] calculat cotele fiecarui meci ca sa vedem daca sunt suspecte - tre sa respecte un raport
 * [DB] tabel junk -> punem in el meciurile cu cote suspecte (care nu respecta un raport calculat din PHP)
 	* meciurile astea nu le mai bagam in tabelul principal
 * [farmare] adaugare site3
 
 	FINALIZAT * [DB] adaugat tabela de dictionar pentru meciuri
-* [DB] adaugat date in dictionare pentru a face primele meciuri
 * [DB] adaugat tabela de erori
 * [DB] adaugat tabela in care se stocheaza match'urile
 * [cupid] alegem varianta cea mai buna de pereche dintre acelasi meci de pe mai mult de 2 site-uri.
