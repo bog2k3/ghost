@@ -6,7 +6,7 @@
  */
 
 #include "cupidData.h"
-#include "../cpplib/log.h"
+#include "../common/log.h"
 #include <algorithm>
 
 bool eCombinatie(float c1, float c2, double &out_raport) {

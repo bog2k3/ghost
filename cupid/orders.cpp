@@ -6,7 +6,7 @@
  */
 
 #include "cupidData.h"
-#include "../cpplib/log.h"
+#include "../common/log.h"
 #include <ostream>
 
 std::ostream & operator <<(std::ostream& str, pariu p) {

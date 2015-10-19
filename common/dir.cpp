@@ -5,7 +5,7 @@
  *      Author: bog
  */
 
-#include "../cpplib/log.h"
+#include "log.h"
 
 #include <dirent.h>
 #include <sys/stat.h>

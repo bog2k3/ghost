@@ -9,8 +9,8 @@
 
 #include "cupidData.h"
 #include "cmdLine.h"
-#include "SQLSock.h"
-#include "../cpplib/log.h"
+#include "../common/SQLSock.h"
+#include "../common/log.h"
 
 std::vector<cupidGameData> gameData;
 std::vector<cupidPair> pairs;
@@ -30,7 +30,7 @@ void testCurl();
 void testDB();
 
 int main(int argc, char* argv[]) {
-	LOGGER("cupid");
+	LOGPREFIX("cupid");
 	cmdLineOptions cmdOpts;
 	parseCommandLine(cmdOpts, argc, argv);
 	if (!cmdOpts.configFilePath.empty())

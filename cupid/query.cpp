@@ -6,9 +6,9 @@
  *  data : 06-octombrie-2015 : Dan : adaugare sortare 
  */
 
-#include "SQLSock.h"
+#include "../common/SQLSock.h"
+#include "../common/log.h"
 #include "cupidData.h"
-#include "../cpplib/log.h"
 #include <stdio.h>
 #include <string>
 

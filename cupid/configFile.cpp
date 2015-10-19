@@ -6,7 +6,7 @@
  */
 
 #include "cmdLine.h"
-#include "../cpplib/log.h"
+#include "../common/log.h"
 #include <fstream>
 #include <sstream>
 #include <map>
