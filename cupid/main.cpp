@@ -5,13 +5,12 @@
  *      Author: bog
  */
 
-#include <unistd.h>
-
 #include "cupidData.h"
 #include "../common/cmdLine.h"
 #include "../common/configFile.h"
 #include "../common/SQLSock.h"
 #include "../common/log.h"
+#include <unistd.h>
 
 std::vector<cupidGameData> gameData;
 std::vector<cupidPair> pairs;

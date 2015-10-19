@@ -19,11 +19,13 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <unistd.h>
 
 void faQuery(ISQLSock &sock, std::string const& tabel) {
 	auto res = sock.doQuery("select echipa1,echipa2,status_echipe from " + tabel+ " order by data_joc");
 
 	while (res->next()) {
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -48,7 +50,7 @@ int main(int argc, char* argv[]) {
 
 	ISQLSock *pSock;
 #ifdef DUMMY_SQL_SOCKET
-	DummySQLSock dummySqlSock;
+	DummySQLSock dummySqlSock("test-maimuța");
 	pSock = &dummySqlSock;
 #else
 	SQLSock sqlSock;
@@ -63,7 +65,7 @@ int main(int argc, char* argv[]) {
 	LOGLN("maimuța incepe loop-ul de cautat echipe netraduse si adaugat in liste...");
 
 	while (true) { // maimuța e nemuritoare!!! muhahaha !!
-		faQuery(*sqlSock, cmdOpts["table"]);
+		faQuery(*pSock, cmdOpts["table"]);
 		sleep(10); // maimuța doarme 10 secunde intre incercari
 
 		break;
