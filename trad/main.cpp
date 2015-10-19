@@ -7,7 +7,7 @@
 
 
 #include "daemon.h"
-#include "../cpplib/log.h"
+#include "../common/log.h"
 #include <iostream>
 #include <locale>
 #include <string>

@@ -6,10 +6,10 @@
  */
 
 #include "daemon.h"
-#include "../cpplib/dir.h"
-#include "../cpplib/log.h"
-#include "../cpplib/split.h"
-#include "../cpplib/assert.h"
+#include "../common/dir.h"
+#include "../common/log.h"
+#include "../common/split.h"
+#include "../common/assert.h"
 #include <fstream>
 #include <algorithm>
 

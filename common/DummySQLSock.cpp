@@ -7,7 +7,7 @@
 
 #include "DummySQLSock.h"
 
-DummySQLSock::DummySQLSock() {
+DummySQLSock::DummySQLSock(const char* filePath) {
 	// TODO Auto-generated constructor stub
 
 }
