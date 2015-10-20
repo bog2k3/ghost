@@ -37,16 +37,38 @@ struct {
 } config;
 
 void faQuery(ISQLSock &sock, std::string const& tabel) {
-	auto res = sock.doQuery("SELECT "+dbLabels.echipa1+","+dbLabels.echipa2+","+dbLabels.statusTraduceri+" FROM " + tabel+ " ORDER BY data_joc");
+	auto res = sock.doQuery(
+			"SELECT "+
+			dbLabels.echipa1+","+
+			dbLabels.echipa2+","+
+			dbLabels.statusTraduceri+","+
+			dbLabels.data+
+			" FROM " + tabel+
+			" ORDER BY "+dbLabels.data);
 
 	while (res->next()) {
 		if (res->getInt(dbLabels.statusTraduceri) == 0)
 			continue;
 
-		// trebuie sa mai fie urmatorul meci la aceeasi ora si echipele sa semene ca nume, altfel e o problema
+		std::string echipa1_1 = res->getString(dbLabels.echipa1);
+		std::string echipa2_1 = res->getString(dbLabels.echipa2);
+		std::string data_1 = res->getString(dbLabels.data);
 
-		res->getString(dbLabels.echipa1);
-		res->getString(dbLabels.echipa2);
+		// trebuie sa mai fie urmatorul meci la aceeasi ora si echipele sa semene ca nume, altfel e o problema
+		if (!res->next())
+			break;
+		std::string echipa1_2 = res->getString(dbLabels.echipa1);
+		std::string echipa2_2 = res->getString(dbLabels.echipa2);
+		std::string data_2 = res->getString(dbLabels.data);
+
+		if (data_1 != data_2) {
+			res->previous();
+			continue;
+		}
+
+		// cele 2 meciuri sunt in acelasi timp :-)
+		// acum vedem daca echipele seamana intre ele:
+		// TODO tre sa vedem cum facem cu simstring aici, sau poate algoritm propriu pentru approx string comparison
 	}
 }
 

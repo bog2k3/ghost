@@ -24,7 +24,7 @@ std::string getCachePath() {
 
 Daemon::Daemon(std::string const& listePath)
 	: pathListe_(listePath)
-	, ngramGenerator_(3, false)
+	, ngramGenerator_(2, false)	// 2 sau 3, vedem cu care e mai bine
 {
 	refreshCache();
 	loadCache();
