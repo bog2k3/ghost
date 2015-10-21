@@ -16,6 +16,7 @@
 #else
 #include "../common/SQLSock.h"
 #endif
+#include "../common/strCompare.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -70,9 +71,10 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 		 * 			consideram ca e aceeasi echipa (un threshold de similaritate)
 		 * 		- adaugam intr-o lista temporara
 		 * 4b. DACA nici una din echipe nu e tradusa:
-		 * 		- la fel, doar ca fiecare dintre echipe trebuie sa depaseasca thresh-ul de similaritate
+		 * 		- la fel, doar ca fiecare dintre echipe trebuie sa depaseasca thresh-ul de similaritate simultan
 		 * 5. parcurgem lista/listele temporara si incercam sa identificam in ea un element care exista in lista de echipe;
-		 * 6a. DACA am gasit un element din lista, le adaugam pe celelalte (care nu sunt traduse) ca alternative la echipa respectiva in lista
+		 * 6a. DACA am gasit un element din lista de echipe, le adaugam pe celelalte (care nu sunt traduse) ca alternative la echipa respectiva
+		 * 		in lista
 		 * 6b. ALTFEL alegem cel mai lung element sa fie cheie, il introducem pe o linie noua in lista de echipe, si pe celelalte ca alternative
 		 *
 		 * 7. DACA nici o alta echipa nu a fost similara (caz singular), trimitem un email cu echipa respectiva (eventual concatenam toate
