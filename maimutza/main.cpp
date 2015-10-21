@@ -43,31 +43,42 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			dbLabels.echipa2+","+
 			dbLabels.statusTraduceri+","+
 			dbLabels.data+
-			" FROM " + tabel+
-			" ORDER BY "+dbLabels.data);
+			" FROM " + tabel +
+			" WHERE " + dbLabels.statusTraduceri + " IS NOT 0");
 
 	while (res->next()) {
-		if (res->getInt(dbLabels.statusTraduceri) == 0)
-			continue;
-
 		std::string echipa1_1 = res->getString(dbLabels.echipa1);
 		std::string echipa2_1 = res->getString(dbLabels.echipa2);
 		std::string data_1 = res->getString(dbLabels.data);
 
-		// trebuie sa mai fie urmatorul meci la aceeasi ora si echipele sa semene ca nume, altfel e o problema
-		if (!res->next())
-			break;
-		std::string echipa1_2 = res->getString(dbLabels.echipa1);
-		std::string echipa2_2 = res->getString(dbLabels.echipa2);
-		std::string data_2 = res->getString(dbLabels.data);
+		// cautam meciuri simultane ca sa incercam sa traducem echipele:
+		auto res2 = sock.doQuery(
+			"SELECT "+
+			dbLabels.echipa1+","+
+			dbLabels.echipa2+","+
+			" FROM " + tabel +
+			" WHERE " + dbLabels.data + " IS \""+data_1+"\""+
+			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
 
-		if (data_1 != data_2) {
-			res->previous();
-			continue;
-		}
+		/*
+		 * 1. punem toate meciurile returnate in res2 intr-un vector
+		 * *. presupunem ca echipele din orice meci sunt sortate in ordine alfabetica (echipa1 < echipa2)
+		 * 2. verificam care dintre echipe nu e tradusa (dupa status)
+		 * 3. parcurgem vectorul si in cazul in care una dintre echipe este tradusa, eliminam meciurile care au echipa respectiva diferita
+		 * 4a. DACA 1 echipa nu e tradusa:
+		 * 		- comparam aproximativ echipa de tradus cu echipa2 din fiecare meci din vector; daca similaritatea e suficienta,
+		 * 			consideram ca e aceeasi echipa (un threshold de similaritate)
+		 * 		- adaugam intr-o lista temporara
+		 * 4b. DACA nici una din echipe nu e tradusa:
+		 * 		- la fel, doar ca fiecare dintre echipe trebuie sa depaseasca thresh-ul de similaritate
+		 * 5. parcurgem lista/listele temporara si incercam sa identificam in ea un element care exista in lista de echipe;
+		 * 6a. DACA am gasit un element din lista, le adaugam pe celelalte (care nu sunt traduse) ca alternative la echipa respectiva in lista
+		 * 6b. ALTFEL alegem cel mai lung element sa fie cheie, il introducem pe o linie noua in lista de echipe, si pe celelalte ca alternative
+		 *
+		 * 7. DACA nici o alta echipa nu a fost similara (caz singular), trimitem un email cu echipa respectiva (eventual concatenam toate
+		 * 		echipele care nu au putut fi traduse intr-un email)
+		 */
 
-		// cele 2 meciuri sunt in acelasi timp :-)
-		// acum vedem daca echipele seamana intre ele:
 		// TODO tre sa vedem cum facem cu simstring aici, sau poate algoritm propriu pentru approx string comparison
 	}
 }
