@@ -8,6 +8,8 @@
 #ifndef STRCOMPARE_H_
 #define STRCOMPARE_H_
 
+#include <string>
+
 struct stringCompareResult {
 	float letterOverlap;		// [0..1] percentage of letters that overlap (not necessarily in the same positions)
 	float wordCountSimilarity;	// [0..1] 1 means same number of words, 0.5 means one string has double the amount of words etc.
