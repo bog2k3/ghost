@@ -9,16 +9,30 @@
 #define STRCOMPARE_H_
 
 #include <string>
+#include <vector>
 
-struct stringCompareResult {
-	float letterOverlap;		// [0..1] percentage of letters that overlap (not necessarily in the same positions)
-	float wordCountSimilarity;	// [0..1] 1 means same number of words, 0.5 means one string has double the amount of words etc.
-	float phraseSimilarity;		// [0..1] how many identical words * (sum of identical words length) / (character count) / (total word count)
-	float weighedLetterOverlap; // [0..1] percentage of letters that overlap normalized by the length ratio of the strings (% * larger_len / smaller_len)
+class StrComp {
+public:
+
+	struct Result {
+		float relativeLetterResemblance;	// how many identical letters relative to the total number of letters
+		float totalWordsAvg;				// average of total words from s1 and s2
+		float relativeWordResemblance;		// percentage that words in the two texts match 1:1
+		int identicalWords;					// how many identical words
+		float identicalWordsPercentage;		// percentage of identical words between s1 and s2
+		float identicalWordsNormalized;		// number of identical words normalized by their length relative to the text's average length
+	};
+
+	StrComp(std::wstring const& s1, std::wstring const& s2);
+	Result getStats();
+
+private:
+	void preprocess();
+	void replaceSubstr(std::wstring &str, std::wstring const& what, std::wstring const& replacement);
+	int getAbsLetterDiff(std::wstring const& s1, std::wstring const& s2);
+	std::wstring s1, s2;
+	std::vector<std::wstring> s1w, s2w;	// words
 };
-
-stringCompareResult compareStrings(std::string const& s1, std::string const& s2);
-
 
 
 #endif /* STRCOMPARE_H_ */
