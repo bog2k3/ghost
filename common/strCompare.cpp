@@ -57,8 +57,8 @@ void StrComp::preprocess() {
 		replaceSubstr(s2, pair.first, pair.second);
 	}
 	// 6. split to words:
-	s1w = strSplit(s1, ' ');
-	s2w = strSplit(s2, ' ');
+	s1w = wstrSplit(s1, L' ');
+	s2w = wstrSplit(s2, L' ');
 }
 
 int StrComp::getAbsLetterDiff(std::wstring const& t1, std::wstring const& t2) {

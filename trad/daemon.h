@@ -23,7 +23,7 @@ public:
 	// traduce o lista de nume.
 	// Cauta in listele cu echipe una care sa fie egala sau aproximativ egala;
 	// Daca nu se gaseste nici una, intoarce "NECUNOSCUT" pe pozitia respectiva
-	std::vector<std::string> match(std::vector<std::string> const& nume, std::string const& sport);
+	std::vector<std::wstring> match(std::vector<std::wstring> const& nume, std::string const& sport);
 
 	// verifica daca s-au updatat listele cu echipe si updateaza cache-ul
 	void refreshCache();
@@ -34,7 +34,7 @@ private:
 
 	struct sportData {
 		std::shared_ptr<simstring::reader> dbReader;
-		std::map<std::string, std::string> alternateNameMap;
+		std::map<std::wstring, std::wstring> alternateNameMap;
 	};
 
 	std::map<std::string, sportData> sportData_;	// maps sport names to db readers (which take a single sport-specific list file as input) & alternate name mappings

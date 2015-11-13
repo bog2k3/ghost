@@ -8,7 +8,7 @@
 #include "wstrManip.h"
 #include <locale>
 
-std::vector<std::wstring> strSplit(const std::wstring &text, char sep) {
+std::vector<std::wstring> strSplit(const std::wstring &text, wchar_t sep) {
 	std::vector<std::wstring> tokens;
 	size_t start = 0, end = 0;
 	while ((end = text.find(sep, start)) != std::wstring::npos) {

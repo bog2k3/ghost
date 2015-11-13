@@ -8,10 +8,11 @@
 #include "daemon.h"
 #include "../common/dir.h"
 #include "../common/log.h"
-#include "../common/split.h"
+#include "../common/wstrManip.h"
 #include "../common/assert.h"
 #include <fstream>
 #include <algorithm>
+#include <locale>
 
 //#define ENABLE_COSINE_MATCHING
 
@@ -30,38 +31,38 @@ Daemon::Daemon(std::string const& listePath)
 	loadCache();
 }
 
-std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std::string const& sport) {
-	std::vector<std::string> ret;
+std::vector<std::wstring> Daemon::match(std::vector<std::wstring> const& nume, std::string const& sport) {
+	std::vector<std::wstring> ret;
 
 	if (sportData_[sport].dbReader == nullptr) {
 		ERROR("Nu exista lista pentru " << sport);
-		ret.assign(nume.size(), "NECUNOSCUT");
+		ret.assign(nume.size(), L"NECUNOSCUT");
 		return ret;
 	}
 
-	for (int i=0; i<nume.size(); i++) {
-		std::string crt = nume[i];
-		std::transform(crt.begin(), crt.end(), crt.begin(), ::tolower);
+	for (unsigned i=0; i<nume.size(); i++) {
+		std::wstring crt = nume[i];
+		wToLower(crt);
 		bool u19 = false, u21 = false;
 		size_t u19pos = 0, u21pos = 0;
-		if ((u19pos = crt.find("u19")) != crt.npos) {
+		if ((u19pos = crt.find(L"u19")) != crt.npos) {
 			u19 = true;
 			crt = crt.substr(0, u19pos) + crt.substr(u19pos+3);
 		}
-		if ((u19pos = crt.find("u 19")) != crt.npos) {
+		if ((u19pos = crt.find(L"u 19")) != crt.npos) {
 			u19 = true;
 			crt = crt.substr(0, u19pos) + crt.substr(u19pos+4);
 		}
-		if ((u21pos = crt.find("u21")) != crt.npos) {
+		if ((u21pos = crt.find(L"u21")) != crt.npos) {
 			u21 = true;
 			crt = crt.substr(0, u21pos) + crt.substr(u21pos+3);
 		}
-		if ((u21pos = crt.find("u 21")) != crt.npos) {
+		if ((u21pos = crt.find(L"u 21")) != crt.npos) {
 			u21 = true;
 			crt = crt.substr(0, u21pos) + crt.substr(u21pos+4);
 		}
 		// Retrieve similar strings into a string vector.
-		std::vector<std::string> xstrs;
+		std::vector<std::wstring> xstrs;
 		float thresh = 0.5f;
 		// try overlap first:
 		do {
@@ -83,14 +84,14 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 		}
 #endif
 		if (xstrs.size()) {
-			std::string numeStd = sportData_[sport].alternateNameMap[xstrs[0]];
+			std::wstring numeStd = sportData_[sport].alternateNameMap[xstrs[0]];
 			if (u19)
-				numeStd += " U19";
+				numeStd += L" U19";
 			if (u21)
-				numeStd += " U21";
+				numeStd += L" U21";
 			ret.push_back(numeStd);
 		} else
-			ret.push_back("NECUNOSCUT");
+			ret.push_back(L"NECUNOSCUT");
 	}
 	assert(ret.size() == nume.size());
 	return ret;
@@ -105,15 +106,17 @@ void Daemon::reloadCacheFile(std::string const& path) {
 	}
 
 	sportData_[sportName].alternateNameMap.clear();
-	std::ifstream flist(stripExt(path));
+	std::wifstream flist(stripExt(path));
 	if (!flist.is_open()) {
 		ERROR("Nu am putut deschide fisierul lista \"" << stripExt(path) << "\"!!!");
 		return;
 	}
+	std::locale loc("en_US.UTF8");
+	flist.imbue(loc);
 	// updatam mapa de nume alternative:
-	std::string line;
+	std::wstring line;
 	while (std::getline(flist, line)) {
-		std::vector<std::string> nume = strSplit(line, ';');
+		std::vector<std::wstring> nume = wstrSplit(line, L';');
 		for (int i=0; i<nume.size(); i++) {
 			if (nume[i].empty())
 				continue;
@@ -137,18 +140,20 @@ void Daemon::updateCacheFile(std::string const& listPath, std::string const& cac
 					<< "\nCache-ul nu va fi updatat !!!");
 			return;
 		}
-	simstring::writer_base<std::string> dbw(ngramGenerator_, cachePath);
+	simstring::writer_base<std::wstring> dbw(ngramGenerator_, cachePath);
 
-	std::ifstream flist(listPath);
+	std::wifstream flist(listPath);
 	if (!flist.is_open()) {
 		ERROR("Nu am putut deschide fisierul lista \"" << listPath << "\"!!!");
 		dbw.close();
 		return;
 	}
-	std::string line;
+	std::locale loc("en_US.UTF8");
+	flist.imbue(loc);
+	std::wstring line;
 	while (std::getline(flist, line)) {
-		std::vector<std::string> nume = strSplit(line, ';');
-		for (int i=0; i<nume.size(); i++)
+		std::vector<std::wstring> nume = wstrSplit(line, L';');
+		for (unsigned i=0; i<nume.size(); i++)
 			dbw.insert(nume[i]);
 	}
 	dbw.close();
