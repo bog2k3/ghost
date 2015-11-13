@@ -6,10 +6,19 @@
  */
 
 #include "strCompare.h"
+#include "wstrManip.h"
+
 #include <algorithm>
-#include <sstream>
-#include <locale>
 #include <map>
+
+// TODO - de citit dintr-un fisier de config:
+std::map<std::wstring, std::wstring> mapDiacrit = {
+		{L"ă", L"a"},
+		{L"â", L"a"},
+		{L"î", L"i"},
+		{L"ș", L"s"},
+		{L"ț", L"t"},
+};
 
 StrComp::StrComp(std::wstring const& s1, std::wstring const& s2)
 	: s1(s1), s2(s2)
@@ -39,35 +48,17 @@ void StrComp::preprocess() {
 		s2 = saux;
 	}
 	// 4. tolower:
-	std::locale loc("en_US.UTF8");
-	auto &f = std::use_facet<std::ctype<wchar_t> >(loc);
-	f.tolower(const_cast<wchar_t*>(s1.c_str()), s1.c_str()+s1.length());
-	f.tolower(const_cast<wchar_t*>(s2.c_str()), s2.c_str()+s2.length());
+	wToLower(s1);
+	wToLower(s2);
+
 	// 5. replace diacritics:
-	replaceSubstr(s1, L"ă", L"a");
-	replaceSubstr(s1, L"â", L"a");
-	replaceSubstr(s1, L"î", L"i");
-	replaceSubstr(s1, L"ș", L"s");
-	replaceSubstr(s1, L"ț", L"t");
-
-	replaceSubstr(s2, L"ă", L"a");
-	replaceSubstr(s2, L"â", L"a");
-	replaceSubstr(s2, L"î", L"i");
-	replaceSubstr(s2, L"ș", L"s");
-	replaceSubstr(s2, L"ț", L"t");
-
+	for (auto &pair : mapDiacrit) {
+		replaceSubstr(s1, pair.first, pair.second);
+		replaceSubstr(s2, pair.first, pair.second);
+	}
 	// 6. split to words:
-	std::wstring tk;
-	std::wstringstream ss1(s1);
-	while (!ss1.eof()) {
-		ss1 >> tk;
-		s1w.push_back(tk);
-	}
-	std::wstringstream ss2(s2);
-	while (!ss2.eof()) {
-		ss2 >> tk;
-		s2w.push_back(tk);
-	}
+	s1w = strSplit(s1, ' ');
+	s2w = strSplit(s2, ' ');
 }
 
 int StrComp::getAbsLetterDiff(std::wstring const& t1, std::wstring const& t2) {
