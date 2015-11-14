@@ -19,7 +19,7 @@ std::map<std::string, std::string> mapDiacrit = {
 		{"ț", "t"}, {"Ț", "T"},
 };
 
-std::vector<std::string> strSplit(const std::string &text, wchar_t sep) {
+std::vector<std::string> strSplit(const std::string &text, char sep) {
 	std::vector<std::string> tokens;
 	size_t start = 0, end = 0;
 	while ((end = text.find(sep, start)) != text.npos) {
