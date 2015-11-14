@@ -5,24 +5,15 @@
  *      Author: bog
  */
 
+#include "../common/strManip.h"
 #include <iostream>
 #include <string>
-#include <locale>
-#include <sstream>
 
 int main(int argc, char* argv[]) {
-
-	std::wstringstream ss;
-	std::locale loc("en_US.UTF8");
-//	ss.imbue(loc);
-//	std::wcout.imbue(loc);
-
-	ss << argv[1];
-	std::wstring str;
-	ss >> str;
-
-	std::wcout << "argv[1]: " << argv[1] << "\n";
-	std::wcout << "wstr: " << str << "\n";
-
-	return 0;
+	std::string str(argv[1]);
+	std::cout << "argv[1]: " << argv[1] << "\n";
+	std::cout << "str.len: " << str.length() << "\n";
+	removeDiacritics(str);
+	strLower(str);
+	std::cout << "str conv: " << str << "\n";
 }

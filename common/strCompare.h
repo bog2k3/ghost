@@ -23,15 +23,14 @@ public:
 		float identicalWordsNormalized;		// number of identical words normalized by their length relative to the text's average length
 	};
 
-	StrComp(std::wstring const& s1, std::wstring const& s2);
+	StrComp(std::string const& s1, std::string const& s2);
 	Result getStats();
 
 private:
 	void preprocess();
-	void replaceSubstr(std::wstring &str, std::wstring const& what, std::wstring const& replacement);
-	int getAbsLetterDiff(std::wstring const& s1, std::wstring const& s2);
-	std::wstring s1, s2;
-	std::vector<std::wstring> s1w, s2w;	// words
+	int getAbsLetterDiff(std::string const& s1, std::string const& s2);
+	std::string s1, s2;
+	std::vector<std::string> s1w, s2w;	// words
 };
 
 

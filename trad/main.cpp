@@ -8,14 +8,14 @@
 
 #include "daemon.h"
 #include "../common/log.h"
+
 #include <iostream>
-#include <locale>
 #include <string>
 
 bool parseCmdLine(int argc, char* argv[],
 		std::string &out_sport,
 		std::string &out_listePath,
-		std::vector<std::wstring> &out_nume) {
+		std::vector<std::string> &out_nume) {
 	bool sportParamExist = false;
 	for (int i=1; i<argc; i++) {
 		if (!strcmp(argv[i], "--sport")) {
@@ -34,12 +34,7 @@ bool parseCmdLine(int argc, char* argv[],
 			out_listePath = argv[++i];
 		}
 		else {
-			std::wstringstream ss(argv[i], strlen(argv[i]));
-			std::locale loc("en_US.UTF8");
-			ss.imbue(loc);
-			std::wstring ws;
-			ss >> ws;
-			out_nume.push_back(ws);
+			out_nume.push_back(argv[i]);
 		}
 	}
 	if (!sportParamExist)
@@ -48,12 +43,9 @@ bool parseCmdLine(int argc, char* argv[],
 }
 
 int main(int argc, char* argv[]) {
-	std::locale::global(std::locale(""));
-	std::cout.imbue(std::locale(""));
-
 	std::string sport;
 	std::string listePath = ".";
-	std::vector<std::wstring> nume;
+	std::vector<std::string> nume;
 	if (!parseCmdLine(argc, argv, sport, listePath, nume)) {
 		ERROR("Sintaxa liniei de comanda este proasta!\n" <<
 				"Exemplu bun: \n" <<
@@ -64,7 +56,7 @@ int main(int argc, char* argv[]) {
 	Daemon daemon(listePath);
 
 	auto traduse = daemon.match(nume, sport);
-	for (int i=0; i<traduse.size(); i++)
+	for (unsigned i=0; i<traduse.size(); i++)
 		std::cout << traduse[i] << "\n";
 
 	return 0;

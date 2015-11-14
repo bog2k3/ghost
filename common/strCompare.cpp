@@ -6,32 +6,14 @@
  */
 
 #include "strCompare.h"
-#include "wstrManip.h"
-
+#include "strManip.h"
 #include <algorithm>
 #include <map>
 
-// TODO - de citit dintr-un fisier de config:
-std::map<std::wstring, std::wstring> mapDiacrit = {
-		{L"ă", L"a"},
-		{L"â", L"a"},
-		{L"î", L"i"},
-		{L"ș", L"s"},
-		{L"ț", L"t"},
-};
-
-StrComp::StrComp(std::wstring const& s1, std::wstring const& s2)
+StrComp::StrComp(std::string const& s1, std::string const& s2)
 	: s1(s1), s2(s2)
 {
 	preprocess();
-}
-
-void StrComp::replaceSubstr(std::wstring &str, std::wstring const& what, std::wstring const& replacement) {
-	size_t pos = 0;
-	while ((pos = str.find(what, pos)) != str.npos) {
-		str.replace(str.begin()+pos, str.begin()+pos+what.length(), replacement);
-		pos += replacement.length();
-	}
 }
 
 void StrComp::preprocess() {
@@ -43,25 +25,24 @@ void StrComp::preprocess() {
 	std::replace(s2.begin(), s2.end(), '-', ' ');
 	// 3. place string with fewer words on first position
 	if (std::count(s1.begin(), s1.end(), ' ') > std::count(s2.begin(), s2.end(), ' ')) {
-		std::wstring saux = s1;
+		std::string saux = s1;
 		s1 = s2;
 		s2 = saux;
 	}
 	// 4. tolower:
-	wToLower(s1);
-	wToLower(s2);
+	strLower(s1);
+	strLower(s2);
 
 	// 5. replace diacritics:
-	for (auto &pair : mapDiacrit) {
-		replaceSubstr(s1, pair.first, pair.second);
-		replaceSubstr(s2, pair.first, pair.second);
-	}
+	removeDiacritics(s1);
+	removeDiacritics(s2);
+
 	// 6. split to words:
-	s1w = wstrSplit(s1, L' ');
-	s2w = wstrSplit(s2, L' ');
+	s1w = strSplit(s1, L' ');
+	s2w = strSplit(s2, L' ');
 }
 
-int StrComp::getAbsLetterDiff(std::wstring const& t1, std::wstring const& t2) {
+int StrComp::getAbsLetterDiff(std::string const& t1, std::string const& t2) {
 	struct letterInfo {
 		int n1 = 0;	// how many times it's in s1
 		int n2 = 0;	// how many times it's in s2
