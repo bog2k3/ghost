@@ -31,6 +31,11 @@ Daemon::Daemon(std::string const& listePath)
 	loadCache();
 }
 
+void Daemon::invalidCharHandler(std::string const& str) {
+	// append to a file then send it via e-mail
+	// TODO
+}
+
 std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std::string const& sport) {
 	std::vector<std::string> ret;
 
@@ -42,6 +47,7 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& nume, std
 
 	for (unsigned i=0; i<nume.size(); i++) {
 		std::string crt = nume[i];
+		removeDiacritics(crt, std::bind(&Daemon::invalidCharHandler, this, std::placeholders::_1));
 		strLower(crt);
 		bool u19 = false, u21 = false;
 		size_t u19pos = 0, u21pos = 0;

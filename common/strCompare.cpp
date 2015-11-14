@@ -10,13 +10,13 @@
 #include <algorithm>
 #include <map>
 
-StrComp::StrComp(std::string const& s1, std::string const& s2)
+StrComp::StrComp(std::string const& s1, std::string const& s2, invalidCharHandler handler)
 	: s1(s1), s2(s2)
 {
-	preprocess();
+	preprocess(handler);
 }
 
-void StrComp::preprocess() {
+void StrComp::preprocess(invalidCharHandler handler) {
 	// 1. strip '.'
 	s1.erase(std::remove(s1.begin(), s1.end(), '.'), s1.end());
 	s2.erase(std::remove(s2.begin(), s2.end(), '.'), s2.end());
@@ -34,8 +34,8 @@ void StrComp::preprocess() {
 	strLower(s2);
 
 	// 5. replace diacritics:
-	removeDiacritics(s1);
-	removeDiacritics(s2);
+	removeDiacritics(s1, handler);
+	removeDiacritics(s2, handler);
 
 	// 6. split to words:
 	s1w = strSplit(s1, L' ');
