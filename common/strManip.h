@@ -7,11 +7,7 @@
 
 #include <string>
 #include <vector>
-#include <functional>
-
-typedef std::function<void(std::string const&)> invalidCharHandler;
 
 std::vector<std::string> strSplit(const std::string &text, char sep);
 void strLower(std::string &in_out);
 void replaceAllSubstr(std::string &str, std::string const& what, std::string const& replacement);
-void removeDiacritics(std::string &in_out,  invalidCharHandler unknownCharHandler);

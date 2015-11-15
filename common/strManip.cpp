@@ -7,16 +7,7 @@
 
 #include "strManip.h"
 #include <algorithm>
-#include <map>
 #include <locale>
-
-std::map<std::string, std::string> mapDiacrit = {
-		{"ă", "a"}, {"Ă", "A"},
-		{"â", "a"}, {"Â", "A"},
-		{"î", "i"}, {"Î", "I"},
-		{"ș", "s"}, {"Ș", "S"},
-		{"ț", "t"}, {"Ț", "T"},
-};
 
 std::vector<std::string> strSplit(const std::string &text, char sep) {
 	std::vector<std::string> tokens;
@@ -43,16 +34,3 @@ void replaceAllSubstr(std::string &str, std::string const& what, std::string con
 	}
 }
 
-void removeDiacritics(std::string &in_out, invalidCharHandler unknownCharHandler) {
-	for (auto &pair : mapDiacrit) {
-		replaceAllSubstr(in_out, pair.first, pair.second);
-	}
-	if (unknownCharHandler) {
-		for (char c : in_out) {
-			if (c & 0x80) {
-				// invalid ASCII multi-byte char detected - that means we don't have it in our map
-				unknownCharHandler(in_out);
-			}
-		}
-	}
-}

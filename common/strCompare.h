@@ -8,7 +8,6 @@
 #ifndef STRCOMPARE_H_
 #define STRCOMPARE_H_
 
-#include "strManip.h"
 #include <string>
 #include <vector>
 
@@ -24,11 +23,11 @@ public:
 		float identicalWordsNormalized;		// number of identical words normalized by their length relative to the text's average length
 	};
 
-	StrComp(std::string const& s1, std::string const& s2, invalidCharHandler handler);
+	StrComp(std::string const& s1, std::string const& s2);
 	Result getStats();
 
 private:
-	void preprocess(invalidCharHandler handler);
+	void preprocess();
 	int getAbsLetterDiff(std::string const& s1, std::string const& s2);
 	std::string s1, s2;
 	std::vector<std::string> s1w, s2w;	// words

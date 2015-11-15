@@ -10,32 +10,19 @@
 #include <algorithm>
 #include <map>
 
-StrComp::StrComp(std::string const& s1, std::string const& s2, invalidCharHandler handler)
+StrComp::StrComp(std::string const& s1, std::string const& s2)
 	: s1(s1), s2(s2)
 {
-	preprocess(handler);
+	preprocess();
 }
 
-void StrComp::preprocess(invalidCharHandler handler) {
-	// 1. strip '.'
-	s1.erase(std::remove(s1.begin(), s1.end(), '.'), s1.end());
-	s2.erase(std::remove(s2.begin(), s2.end(), '.'), s2.end());
-	// 2. replace '-' with ' '
-	std::replace(s1.begin(), s1.end(), '-', ' ');
-	std::replace(s2.begin(), s2.end(), '-', ' ');
-	// 3. place string with fewer words on first position
+void StrComp::preprocess() {
+	// place string with fewer words on first position
 	if (std::count(s1.begin(), s1.end(), ' ') > std::count(s2.begin(), s2.end(), ' ')) {
 		std::string saux = s1;
 		s1 = s2;
 		s2 = saux;
 	}
-	// 4. tolower:
-	strLower(s1);
-	strLower(s2);
-
-	// 5. replace diacritics:
-	removeDiacritics(s1, handler);
-	removeDiacritics(s2, handler);
 
 	// 6. split to words:
 	s1w = strSplit(s1, L' ');
@@ -59,7 +46,9 @@ int StrComp::getAbsLetterDiff(std::string const& t1, std::string const& t2) {
 }
 
 StrComp::Result StrComp::getStats() {
-	StrComp::Result res;
+	StrComp::Result res = {0};
+	if (s1w.empty() || s2w.empty())
+		return res;
 
 	// 1. relative letter resemblance
 	size_t lenTotal = s1.length() + s2.length();
