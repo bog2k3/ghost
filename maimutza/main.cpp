@@ -43,27 +43,39 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			dbLabels.echipa1+","+
 			dbLabels.echipa2+","+
 			dbLabels.statusTraduceri+","+
-			dbLabels.data+
+			dbLabels.data +
 			" FROM " + tabel +
 			" WHERE " + dbLabels.statusTraduceri + " IS NOT 0");
 
+	struct meciInfo {
+		std::string echipa1;
+		std::string echipa2;
+		std::string data;
+		int statusTrad;
+	};
+
 	while (res->next()) {
-		std::string echipa1_1 = res->getString(dbLabels.echipa1);
-		std::string echipa2_1 = res->getString(dbLabels.echipa2);
-		std::string data_1 = res->getString(dbLabels.data);
+		meciInfo crt;
+		crt.echipa1 = res->getString(dbLabels.echipa1);
+		crt.echipa2 = res->getString(dbLabels.echipa2);
+		crt.data = res->getString(dbLabels.data);
+		crt.statusTrad = res->getInt(dbLabels.statusTraduceri);
 
 		// cautam meciuri simultane ca sa incercam sa traducem echipele:
 		auto res2 = sock.doQuery(
 			"SELECT "+
 			dbLabels.echipa1+","+
 			dbLabels.echipa2+","+
+			dbLabels.statusTraduceri+
 			" FROM " + tabel +
-			" WHERE " + dbLabels.data + " IS \""+data_1+"\""+
+			" WHERE " + dbLabels.data + " IS \""+crt.data+"\""+
 			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
 
 		/*
 		 * 1. punem toate meciurile returnate in res2 intr-un vector
-		 * *. presupunem ca echipele din orice meci sunt sortate in ordine alfabetica (echipa1 < echipa2)
+		 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		 *  !!! PRESUPUNEM CA ECHIPELE DIN ORICE MECI SUNT SORTATE IN ORDINE ALFABETICA (ECHIPA1 < ECHIPA2)
+		 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		 * 2. verificam care dintre echipe nu e tradusa (dupa status)
 		 * 3. parcurgem vectorul si in cazul in care una dintre echipe este tradusa, eliminam meciurile care au echipa respectiva diferita
 		 * 4a. DACA 1 echipa nu e tradusa:
@@ -81,7 +93,17 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 		 * 		echipele care nu au putut fi traduse intr-un email)
 		 */
 
-		// TODO tre sa vedem cum facem cu simstring aici, sau poate algoritm propriu pentru approx string comparison
+
+		std::vector<meciInfo> simultane;
+		while (res2->next()) {
+			meciInfo r2;
+			r2.echipa1 = res2->getString(dbLabels.echipa1);
+			r2.echipa2 = res2->getString(dbLabels.echipa2);
+			r2.data = res2->getString(dbLabels.data);
+			r2.statusTrad = res2->getString(dbLabels.statusTraduceri);
+
+			simultane.push_back(r2);
+		}
 	}
 }
 
