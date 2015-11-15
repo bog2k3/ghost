@@ -45,7 +45,11 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			dbLabels.statusTraduceri+","+
 			dbLabels.data +
 			" FROM " + tabel +
-			" WHERE " + dbLabels.statusTraduceri + " IS NOT 0");
+			" WHERE " + dbLabels.statusTraduceri + " != 0"+
+			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");
+
+	std::map<std::string, std::string> traduceriCurente; // aici stocam traducerile noi pe care le facem la pasul asta, la sfarsit le scriem in liste
+				// key - stringul netradus; val - stringul tradus
 
 	struct meciInfo {
 		std::string echipa1;
@@ -68,7 +72,8 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			dbLabels.echipa2+","+
 			dbLabels.statusTraduceri+
 			" FROM " + tabel +
-			" WHERE " + dbLabels.data + " IS \""+crt.data+"\""+
+			" WHERE " + dbLabels.data + " = \""+crt.data+"\" "+
+			" AND " + dbLabels.statusTraduceri + " != 3"+
 			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
 
 		/*
@@ -94,7 +99,6 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 		 */
 
 
-		std::vector<meciInfo> simultane;
 		while (res2->next()) {
 			meciInfo r2;
 			r2.echipa1 = res2->getString(dbLabels.echipa1);
@@ -102,7 +106,26 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			r2.data = res2->getString(dbLabels.data);
 			r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
 
-			simultane.push_back(r2);
+			switch (crt.statusTrad) {
+			case 3:
+				// nici o echipa din crt nu e tradusa
+				break;
+			case 2:
+				// echipa 2 din crt nu e tradusa
+				if ((r2.statusTrad & 1) == 0) {
+					// echipa 1 din r2 e tradusa
+					if (r2.echipa1 != crt.echipa1)	// echipele traduse difera
+						continue;
+				} else {
+					// echipa 2 din r2 e tradusa
+				}
+				break;
+			case 1:
+				// echipa 1 din crt nu e tradusa
+				break;
+			}
+
+//			simultane.push_back(r2);
 		}
 	}
 }
