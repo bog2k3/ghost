@@ -100,7 +100,7 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			r2.echipa1 = res2->getString(dbLabels.echipa1);
 			r2.echipa2 = res2->getString(dbLabels.echipa2);
 			r2.data = res2->getString(dbLabels.data);
-			r2.statusTrad = res2->getString(dbLabels.statusTraduceri);
+			r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
 
 			simultane.push_back(r2);
 		}
