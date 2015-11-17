@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> strSplit(const std::string &text, char sep);
+unsigned getNumberOfWords(std::string const& str);
+std::vector<std::string> strSplit(std::string const& text, char sep);
 void strLower(std::string &in_out);
 void replaceAllSubstr(std::string &str, std::string const& what, std::string const& replacement);

@@ -7,6 +7,8 @@
 
 #define DUMMY_SQL_SOCKET
 
+#include "listFile.h"
+
 #include "../common/configFile.h"
 #include "../common/cmdLine.h"
 #include "../common/log.h"
@@ -17,6 +19,7 @@
 #include "../common/SQLSock.h"
 #endif
 #include "../common/strCompare.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -27,6 +30,7 @@
 struct {
 	const std::string table {"table"};
 	const std::string configPath {"config"};
+	const std::string listePath {"lPath"};
 } cmdLine;
 
 // numele parametrilor din fisierul de config:
@@ -37,7 +41,7 @@ struct {
 	const std::string dbName {"database"};
 } config;
 
-void faQuery(ISQLSock &sock, std::string const& tabel) {
+void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& listePath) {
 	auto res = sock.doQuery(
 			"SELECT "+
 			dbLabels.echipa1+","+
@@ -48,8 +52,11 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 			" WHERE " + dbLabels.statusTraduceri + " != 0"+
 			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");
 
-	std::map<std::string, std::string> traduceriCurente; // aici stocam traducerile noi pe care le facem la pasul asta, la sfarsit le scriem in liste
-				// key - stringul netradus; val - stringul tradus
+	listFile lf = loadListFile(listePath+'/'+tabel);
+	if (lf.io_result != listFile::IO_OK) {
+		ERROR("maimuța nu poate deschide listele!!! \"" << listePath+'/'+tabel << "\"");
+		return;
+	}
 
 	struct meciInfo {
 		std::string echipa1;
@@ -137,8 +144,6 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 				}
 				break;
 			}
-
-//			simultane.push_back(r2);
 		}
 	}
 }
@@ -149,8 +154,8 @@ int main(int argc, char* argv[]) {
 	std::cout.imbue(std::locale(""));
 
 	std::map<std::string, std::string> cmdOpts;
-	cmdOpts["lPath"] = ".";
-	if (!parseCommandLine(argc, argv, cmdOpts, {cmdLine.table, cmdLine.configPath})) {
+	cmdOpts[cmdLine.listePath] = ".";
+	if (!parseCommandLine(argc, argv, cmdOpts, {cmdLine.table, cmdLine.configPath, cmdLine.listePath})) {
 		ERROR("Linie de comanda invalida!");
 		ERROR("Exemplu linie de comanda valida:\n" <<
 				"maimutza --table fotbal --config ~/.maimutza.config --lPath path/to/liste");
@@ -180,7 +185,7 @@ int main(int argc, char* argv[]) {
 	LOGLN("maimuța incepe loop-ul de cautat echipe netraduse si adaugat in liste...");
 
 	while (true) { // maimuța e nemuritoare!!! muhahaha !!
-		faQuery(*pSock, cmdOpts[cmdLine.table]);
+		maimutareste(*pSock, cmdOpts[cmdLine.table], cmdOpts[cmdLine.listePath]);
 		sleep(10); // maimuța doarme 10 secunde intre incercari
 
 		break;

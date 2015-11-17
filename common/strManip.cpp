@@ -34,3 +34,6 @@ void replaceAllSubstr(std::string &str, std::string const& what, std::string con
 	}
 }
 
+unsigned getNumberOfWords(std::string const& str) {
+	return std::count(str.begin(), str.end(), ' ');
+}
