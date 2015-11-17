@@ -9,13 +9,26 @@
 #include <algorithm>
 #include <locale>
 
-std::vector<std::string> strSplit(const std::string &text, char sep) {
+std::vector<std::string> strSplit(std::string const& text, char sep) {
+	return strSplit(text, std::vector<char>{sep});
+}
+
+std::vector<std::string> strSplit(std::string const& text, std::vector<char> const& sep) {
 	std::vector<std::string> tokens;
 	size_t start = 0, end = 0;
-	while ((end = text.find(sep, start)) != text.npos) {
-		tokens.push_back(text.substr(start, end - start));
-		start = end + 1;
-	}
+	do {
+		end = text.npos;
+		for (auto c : sep) {
+			auto end1 = text.find(c, start);
+			if (end1 < end)
+				end = end1;
+		}
+		if (end != text.npos) {
+			tokens.push_back(text.substr(start, end - start));
+			start = end + 1;
+		}
+	} while (end != text.npos);
+
 	tokens.push_back(text.substr(start));
 	return tokens;
 }

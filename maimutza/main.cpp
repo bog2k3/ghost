@@ -26,8 +26,8 @@
 #include <cstring>
 #include <unistd.h>
 
-constexpr float idWordNorm_thresh = 0.7f;	// threshold for StrComp::Result::identicalWordsNormalized
-constexpr float wordResemb_thresh = 0.7f;	// threshold for StrComp::Result::relativeWordResemblance
+constexpr float idWordNorm_thresh = 0.55f;	// threshold for StrComp::Result::identicalWordsNormalized
+constexpr float wordResemb_thresh = 0.75f;	// threshold for StrComp::Result::relativeWordResemblance
 
 // numele argumentelor de pe cmd line:
 struct {
@@ -193,11 +193,12 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 							statSmall = aux;
 						}
 						if (statBig->identicalWordsNormalized < idWordNorm_thresh) {
-							// nu pare sa fie acelasi meci, trecem mai departe
-							continue;
+							if (statBig->relativeWordResemblance < wordResemb_thresh)
+								// nu pare sa fie acelasi meci, trecem mai departe
+								continue;
 						}
 						// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
-
+						if (statSmall)
 					}
 				}
 				break;

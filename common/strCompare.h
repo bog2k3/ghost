@@ -11,15 +11,16 @@
 #include <string>
 #include <vector>
 
+class WordFreqMap;
+
 class StrComp {
 public:
-
 	struct Result {
-		StrComp* const owner;
+		StrComp* owner = nullptr;
 		float relativeLetterResemblance = 0;	// how many identical letters relative to the total number of letters
 		float totalWordsAvg = 0;				// average of total words from s1 and s2
 		float relativeWordResemblance = 0;		// percentage that words in the two texts match 1:1
-		int identicalWords = 0;					// how many identical words
+		float identicalWords = 0;				// how many identical words (can have fractions, if words are nearly-identical)
 		float identicalWordsPercentage = 0;		// percentage of identical words between s1 and s2
 		float identicalWordsNormalized = 0;		// number of identical words normalized by their length relative to the text's average length
 
@@ -27,7 +28,7 @@ public:
 	};
 
 	StrComp(std::string const& s1, std::string const& s2);
-	Result getStats();
+	Result getStats(WordFreqMap* pFreqMap = nullptr);	// provide a WordFreqMap in order to get more relevant results (common words have a smaller weight in comparison than rarer words)
 	std::string const& getS1() { return s1; }
 	std::string const& getS2() { return s2; }
 
