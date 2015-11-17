@@ -26,6 +26,9 @@
 #include <cstring>
 #include <unistd.h>
 
+constexpr float idWordNorm_thresh = 0.7f;	// threshold for StrComp::Result::identicalWordsNormalized
+constexpr float wordResemb_thresh = 0.7f;	// threshold for StrComp::Result::relativeWordResemblance
+
 // numele argumentelor de pe cmd line:
 struct {
 	const std::string table {"table"};
@@ -66,6 +69,8 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		std::string data;
 		int statusTrad;
 	};
+
+	std::vector<std::pair<std::string, std::string>> dubioase;
 
 	// 3. parcurgem meciurile netraduse si incercam sa gasim traduceri:
 	while (res->next()) {
@@ -128,12 +133,21 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
 				if (r2.statusTrad == 0) {
 					// ambele echipe din r2 sunt traduse, de vis :-)
-					if (*pTrad == r2.echipa1) {
-						// inseamna ca pNetrad e echivalenta cu r2.echipa2
-						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
-					} else if (*pTrad == r2.echipa2) {
-						// inseamna ca pNetrad e echivalenta cu r2.echipa1
-						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
+					std::string *pEchiv = (*pTrad == r2.echipa1) ? r2.echipa2 : ((*pTrad == r2.echipa2) ? r2.echipa1 : nullptr);
+					if (pEchiv) {
+						// inseamna ca pNetrad e echivalenta cu r2.echipa1 sau r2.echipa2
+						StrComp comp(*pNetrad, *pEchiv);
+						auto cstat = comp.getStats();
+						if ((cstat.identicalWordsNormalized > idWordNorm_thresh) ||
+							(cstat.relativeWordResemblance > wordResemb_thresh)) {
+							// OK
+							lf.addNewAlias(*pEchiv, *pNetrad);
+						} else {
+							// e dubios, nu prea se potriveste, dam warning pe mail
+							dubioase.push_back(std::make_pair(*pEchiv, *pNetrad));
+							// adaugam si ca alias totusi, in caz ca e naspa doar stergem, nu stam sa le adaugam de mana pe toate dubioase
+							lf.addNewAlias(*pEchiv, *pNetrad);
+						}
 					} else
 						continue; // r2 nu e acelasi meci, chiar daca e in acelasi timp
 				} else {
