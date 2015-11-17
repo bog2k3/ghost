@@ -17,6 +17,7 @@
 * [DB] tabel junk -> punem in el meciurile cu cote suspecte (care nu respecta un raport calculat din PHP)
 	* meciurile astea nu le mai bagam in tabelul principal
 * [farmare] adaugare site3
+* [farmare] daca cel putin o echipa nu a fost tradusa, nu mai calculezi hash, n-are rost
 
 	FINALIZAT * [DB] adaugat tabela de dictionar pentru meciuri
 * [DB] adaugat tabela de erori

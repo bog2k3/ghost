@@ -42,6 +42,14 @@ struct {
 } config;
 
 void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& listePath) {
+	// 1. incarcam listele:
+	listFile lf = loadListFile(listePath+'/'+tabel);
+	if (lf.io_result != listFile::IO_OK) {
+		ERROR("maimuța nu poate deschide listele!!! \"" << listePath+'/'+tabel << "\"");
+		return;
+	}
+
+	// 2. cerem meciurile netraduse:
 	auto res = sock.doQuery(
 			"SELECT "+
 			dbLabels.echipa1+","+
@@ -52,12 +60,6 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 			" WHERE " + dbLabels.statusTraduceri + " != 0"+
 			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");
 
-	listFile lf = loadListFile(listePath+'/'+tabel);
-	if (lf.io_result != listFile::IO_OK) {
-		ERROR("maimuța nu poate deschide listele!!! \"" << listePath+'/'+tabel << "\"");
-		return;
-	}
-
 	struct meciInfo {
 		std::string echipa1;
 		std::string echipa2;
@@ -65,6 +67,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		int statusTrad;
 	};
 
+	// 3. parcurgem meciurile netraduse si incercam sa gasim traduceri:
 	while (res->next()) {
 		meciInfo crt;
 		crt.echipa1 = res->getString(dbLabels.echipa1);
@@ -83,7 +86,8 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 			" AND " + dbLabels.statusTraduceri + " != 3"+
 			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
 
-		/*
+		/* !!! algoritmu descris aici e mai vechi, nu e chiar exact implementat, dar cat de cat:
+		 *
 		 * 1. punem toate meciurile returnate in res2 intr-un vector
 		 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		 *  !!! PRESUPUNEM CA ECHIPELE DIN ORICE MECI SUNT SORTATE IN ORDINE ALFABETICA (ECHIPA1 < ECHIPA2)
