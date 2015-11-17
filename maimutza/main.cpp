@@ -108,20 +108,33 @@ void faQuery(ISQLSock &sock, std::string const& tabel) {
 
 			switch (crt.statusTrad) {
 			case 3:
-				// nici o echipa din crt nu e tradusa
+				// nici o echipa din crt nu e tradusa, aici e cam naspa
 				break;
 			case 2:
-				// echipa 2 din crt nu e tradusa
-				if ((r2.statusTrad & 1) == 0) {
-					// echipa 1 din r2 e tradusa
-					if (r2.echipa1 != crt.echipa1)	// echipele traduse difera
-						continue;
-				} else {
-					// echipa 2 din r2 e tradusa
-				}
-				break;
 			case 1:
-				// echipa 1 din crt nu e tradusa
+				// o echipa din crt nu e tradusa
+				std::string* pTrad = crt.statusTrad == 1 ? &crt.echipa2 : &crt.echipa1;
+				std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
+				if (r2.statusTrad == 0) {
+					// ambele echipe din r2 sunt traduse, de vis :-)
+					if (*pTrad == r2.echipa1) {
+						// inseamna ca pNetrad e echivalenta cu r2.echipa2
+						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
+					} else if (*pTrad == r2.echipa2) {
+						// inseamna ca pNetrad e echivalenta cu r2.echipa1
+						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
+					} else
+						continue; // r2 nu e acelasi meci, chiar daca e in acelasi timp
+				} else {
+					// una dintre ecihpele din r2 nu e tradusa
+					std::string* pR2Trad = r2.statusTrad == 1 ? &r2.echipa2 : &r2.echipa1;
+					std::string* pR2Netrad = r2.statusTrad == 1 ? &r2.echipa1 : &r2.echipa2;
+					if (*pR2Trad == *pTrad) {
+						// avem o echipa comuna si aceeasi data => si cealalata trebuie sa fie aceeasi
+						// adica => *pR2Netrad == *pNetrad    -> avem inregistrare noua aici, alegem pe cea mai lunga ca cheie
+						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
+					}
+				}
 				break;
 			}
 
