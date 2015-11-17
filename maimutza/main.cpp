@@ -135,7 +135,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 					// ambele echipe din r2 sunt traduse, de vis :-)
 					std::string *pEchiv = (*pTrad == r2.echipa1) ? r2.echipa2 : ((*pTrad == r2.echipa2) ? r2.echipa1 : nullptr);
 					if (pEchiv) {
-						// inseamna ca pNetrad e echivalenta cu r2.echipa1 sau r2.echipa2
+						// inseamna ca pNetrad trebuie sa fie echivalenta cu r2.echipa1 sau r2.echipa2
 						StrComp comp(*pNetrad, *pEchiv);
 						auto cstat = comp.getStats();
 						if ((cstat.identicalWordsNormalized > idWordNorm_thresh) ||
@@ -155,9 +155,49 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 					std::string* pR2Trad = r2.statusTrad == 1 ? &r2.echipa2 : &r2.echipa1;
 					std::string* pR2Netrad = r2.statusTrad == 1 ? &r2.echipa1 : &r2.echipa2;
 					if (*pR2Trad == *pTrad) {
-						// avem o echipa comuna si aceeasi data => si cealalata trebuie sa fie aceeasi
+						// avem o echipa comuna si aceeasi data => si cealalata TREBUIE sa fie aceeasi
+						StrComp scomp(*pR2Netrad, *pNetrad);
+						auto cstat = scomp.getStats();
+						if ((cstat.identicalWordsNormalized > idWordNorm_thresh) ||
+							(cstat.relativeWordResemblance > wordResemb_thresh)) {
+							// OK
+							lf.addNewAlias(*pNetrad, *pR2Netrad);
+						} else {
+							// e dubios, nu prea se potriveste, dam warning pe mail
+							dubioase.push_back(std::make_pair(*pNetrad, *pR2Netrad));
+							// adaugam si ca alias totusi, in caz ca e naspa doar stergem, nu stam sa le adaugam de mana pe toate dubioase
+							lf.addNewAlias(*pNetrad, *pR2Netrad);
+						}
 						// adica => *pR2Netrad == *pNetrad    -> avem inregistrare noua aici, alegem pe cea mai lunga ca cheie
 						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
+					} else {
+						// s-ar putea ca fiecare echipa tradusa sa fie echivalenta cu cea netradusa, verificam:
+						// A: pTrad vs pR2Netrad
+						// B: pNetrad vs pR2Trad
+						StrComp scA(*pTrad, *pR2Netrad);
+						StrComp scB(*pR2Trad, *pNetrad);
+						auto statA = scA.getStats();
+						auto statB = scB.getStats();
+						decltype(statA) *statBig = &statA, *statSmall = statB;
+						// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
+						// si interschimbam daca nu:
+						if (statBig->identicalWordsNormalized == 0) {
+							if (statBig->relativeWordResemblance < statSmall->relativeWordResemblance) {
+								decltype(statBig) aux = statBig;
+								statBig = statSmall;
+								statSmall = aux;
+							}
+						} else if (statBig->identicalWordsNormalized < statSmall->identicalWordsNormalized) {
+							decltype(statBig) aux = statBig;
+							statBig = statSmall;
+							statSmall = aux;
+						}
+						if (statBig->identicalWordsNormalized < idWordNorm_thresh) {
+							// nu pare sa fie acelasi meci, trecem mai departe
+							continue;
+						}
+						// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
+
 					}
 				}
 				break;

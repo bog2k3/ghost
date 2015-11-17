@@ -46,7 +46,7 @@ int StrComp::getAbsLetterDiff(std::string const& t1, std::string const& t2) {
 }
 
 StrComp::Result StrComp::getStats() {
-	StrComp::Result res = {0};
+	StrComp::Result res(this);
 	if (s1w.empty() || s2w.empty())
 		return res;
 
