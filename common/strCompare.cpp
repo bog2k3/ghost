@@ -116,6 +116,7 @@ StrComp::Result StrComp::getStats(const WordFreqMap* pFreqMap) {
 		int secondIndex = -1;
 		for (unsigned j=0; j<s2w.size(); j++) {
 			double similarity = 1.0 - (double)getAbsLetterDiff(s1w[i], s2w[j]) / (s1w[i].length() + s2w[j].length());
+			// TODO - better similarity determination - modify getAbsLetterDiff
 			if (similarity > maxResemblance) {
 				maxResemblance = similarity;
 				secondIndex = j;

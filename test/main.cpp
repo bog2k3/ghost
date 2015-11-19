@@ -26,7 +26,7 @@ void printRes(StrComp::Result const& res) {
 	std::cout << res.s1 << " [vs] " << res.s2 << ":\n";
 #endif
 	std::cout <<"idw:"<< res.identicalWords << "\tidwn:" << res.identicalWordsNormalized << "\tidw%:" << res.identicalWordsPercentage*100
-			<< "\trwr:" << res.relativeWordResemblance << "\trlr:" << res.relativeLetterResemblance << "\n\n";
+			<< "\trwr:" << res.relativeWordResemblance << "\n\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -60,9 +60,9 @@ int main(int argc, char* argv[]) {
 //	freqMap.addWordList(simpleWordList);
 
 
-	std::cout << "idWords\tidWordsNorm\tidWordsPercent\trelWordResemb\trelLetterResmb\n\n";
+	std::cout << "idWords\tidWordsNorm\tidWordsPercent\trelWordResemb\n\n";
 
-//	compare("asa", "asa", freqMap);
+	compare("caransebes", "rehden", freqMap);
 //	compare("asa", "asa bcd", freqMap);
 //	compare("asa", "asa bcde", freqMap);
 //	compare("asa mures", "asa targu mures", freqMap);
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 		return r1.identicalWordsNormalized > r2.identicalWordsNormalized
 				||
 				(r1.identicalWordsNormalized == r2.identicalWordsNormalized &&
-						r1.relativeLetterResemblance > r2.relativeLetterResemblance);
+						r1.relativeWordResemblance > r2.relativeWordResemblance);
 	});
 	for (int i=0; i<100; i++)
 		printRes(res[i]);
