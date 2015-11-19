@@ -15,7 +15,7 @@
 class WordFreqMap {
 public:
 	void addWordList(std::vector<std::string> words);
-	float getWordFreq(std::string const& word) const;
+	double getWordFreq(std::string const& word) const;
 	int getSampleSize() const { return nTotalWords; }
 
 	void debugPrint(std::ostream &stream);

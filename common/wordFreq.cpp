@@ -15,13 +15,13 @@ void WordFreqMap::addWordList(std::vector<std::string> words) {
 	}
 }
 
-float WordFreqMap::getWordFreq(std::string const& word) const {
+double WordFreqMap::getWordFreq(std::string const& word) const {
 	auto it = occurences.find(word);
-	return it == occurences.end() ? 0 : it->second / (float)nTotalWords;
+	return it == occurences.end() ? 0 : it->second / (double)nTotalWords;
 }
 
 void WordFreqMap::debugPrint(std::ostream &stream) {
-	float div = 1.f / nTotalWords;
+	double div = 1.0 / nTotalWords;
 	for (auto it : occurences) {
 		stream << it.first << "\t\t" << it.second * div << "\n";
 	}
