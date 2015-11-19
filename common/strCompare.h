@@ -29,14 +29,16 @@ public:
 
 	StrComp(std::string const& s1, std::string const& s2);
 	Result getStats(const WordFreqMap* pFreqMap = nullptr);	// provide a WordFreqMap in order to get more relevant results (common words have a smaller weight in comparison than rarer words)
-	std::string const& getS1() { return s1; }
-	std::string const& getS2() { return s2; }
+	std::string const& getS1() { return s1_; }
+	std::string const& getS2() { return s2_; }
 
 private:
 	void preprocess();
 	int getAbsLetterDiff(std::string const& s1, std::string const& s2);
-	std::string s1, s2;
-	std::vector<std::string> s1w, s2w;	// words
+	void getNGramResemblance(int n, std::string const& s1, std::string const& s2, double &out_similarity, int &out_longestStreak);
+	std::vector<std::string> generateNGrams(int n, std::string const& s);
+	std::string s1_, s2_;
+	std::vector<std::string> s1w_, s2w_;	// words
 };
 
 

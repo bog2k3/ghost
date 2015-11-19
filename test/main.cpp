@@ -25,7 +25,7 @@ void printRes(StrComp::Result const& res) {
 #ifdef DEBUG
 	std::cout << res.s1 << " [vs] " << res.s2 << ":\n";
 #endif
-	std::cout <<"idw:"<< res.identicalWords << "\tidwn:" << res.identicalWordsNormalized << "\tidw%:" << res.identicalWordsPercentage*100
+	std::cout <<"idw:"<< res.identicalWords << "\tidw%:" << res.identicalWordsPercentage*100
 			<< "\trwr:" << res.relativeWordResemblance << "\n\n";
 }
 
@@ -60,17 +60,15 @@ int main(int argc, char* argv[]) {
 //	freqMap.addWordList(simpleWordList);
 
 
-	std::cout << "idWords\tidWordsNorm\tidWordsPercent\trelWordResemb\n\n";
-
-	compare("caransebes", "rehden", freqMap);
-//	compare("asa", "asa bcd", freqMap);
-//	compare("asa", "asa bcde", freqMap);
-//	compare("asa mures", "asa targu mures", freqMap);
-//	compare("asa", "asa targu mures", freqMap);
-//	compare("asa", "astra giurgiu", freqMap);
-//	compare("rapid bucuresti", "steaua bucuresti", freqMap);
-//	compare("bucharest", "bucuresti", freqMap);
-//	compare("rapid bucharest", "rapid bucuresti", freqMap);
+//	printRes(compare("caransebes", "rehden", freqMap));
+//	printRes(compare("asa", "asa bcd", freqMap));
+//	printRes(compare("asa", "asa bcde", freqMap));
+//	printRes(compare("asa mures", "asa targu mures", freqMap));
+//	printRes(compare("asa", "asa targu mures", freqMap));
+//	printRes(compare("asa", "astra giurgiu", freqMap));
+//	printRes(compare("rapid bucuresti", "steaua bucuresti", freqMap));
+//	printRes(compare("bucharest", "bucuresti", freqMap));
+//	printRes(compare("rapid bucharest", "rapid bucuresti", freqMap));
 
 	std::srand(time(nullptr));
 	std::vector<StrComp::Result> res;
@@ -80,10 +78,7 @@ int main(int argc, char* argv[]) {
 		res.push_back(compare(e1, e2, freqMap));
 	}
 	std::sort(res.begin(), res.end(), [](StrComp::Result const&r1, StrComp::Result const& r2) {
-		return r1.identicalWordsNormalized > r2.identicalWordsNormalized
-				||
-				(r1.identicalWordsNormalized == r2.identicalWordsNormalized &&
-						r1.relativeWordResemblance > r2.relativeWordResemblance);
+		return r1.relativeWordResemblance*r1.identicalWords > r2.relativeWordResemblance*r2.identicalWords;
 	});
 	for (int i=0; i<100; i++)
 		printRes(res[i]);
