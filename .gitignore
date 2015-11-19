@@ -30,6 +30,7 @@
 
 # eclipse stuff
 .metadata/
+.settings/
 RemoteSystemsTempFiles/
 Debug/
 Release/

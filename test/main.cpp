@@ -13,6 +13,18 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <set>
+
+void compare(std::string const& s1, std::string const& s2, WordFreqMap const& freqMap) {
+	StrComp sc(s1, s2);
+	std::cout << sc.getS1() << " [vs] " << sc.getS2() << ":\n";
+	auto res = sc.getStats(nullptr);
+	std::cout << "[FM OFF]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.identicalWordsPercentage
+			<< "\t" << res.relativeWordResemblance << "\t" << res.relativeLetterResemblance << "\n\n";
+	res = sc.getStats(&freqMap);
+	std::cout << "[FM ON ]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.identicalWordsPercentage
+			<< "\t" << res.relativeWordResemblance << "\t" << res.relativeLetterResemblance << "\n\n";
+}
 
 int main(int argc, char* argv[]) {
 	LOGPREFIX("test");
@@ -26,45 +38,33 @@ int main(int argc, char* argv[]) {
 	std::string line;
 	while (std::getline(f, line)) {
 		std::vector<std::string> words = strSplit(line, {' ', ';'});
+		std::set<std::string> uniqueWords;
+		for (auto w : words) {
+			uniqueWords.insert(w);
+		}
+		words.clear();
+		words.assign(uniqueWords.begin(), uniqueWords.end());
 		wordList.insert(wordList.end(), words.begin(), words.end());
 	}
+	std::vector<std::string> simpleWordList = {
+			"asa", "bcd", "astra", "targu", "mures","giurgiu","rapid","bucuresti","steaua","dinamo","bucharest"
+	}; // uniformFreq: f = 0.1
 	WordFreqMap freqMap;
 	freqMap.addWordList(wordList);
+//	freqMap.addWordList(simpleWordList);
 
-	std::cout << "idWords\tidWordsNorm\trelWordResemb\n";
 
-	StrComp sc("asa", "asa targu mures");
-	std::cout << sc.getS1() << " [vs] " << sc.getS2() << ":\n";
-	auto res = sc.getStats();
-	std::cout << "[FM OFF]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-	res = sc.getStats(&freqMap);
-	std::cout << "[FM ON ]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
+	std::cout << "idWords\tidWordsNorm\tidWordsPercent\trelWordResemb\trelLetterResmb\n";
 
-	sc = StrComp("asa", "astra giurgiu");
-	std::cout << sc.getS1() << " [vs] " << sc.getS2() << ":\n";
-	res = sc.getStats();
-	std::cout << "[FM OFF]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-	res = sc.getStats(&freqMap);
-	std::cout << "[FM ON ]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
+	compare("asa", "asa", freqMap);
+	compare("asa", "asa bcd", freqMap);
+	compare("asa", "asa bcde", freqMap);
+	compare("asa mures", "asa targu mures", freqMap);
+	compare("asa", "asa targu mures", freqMap);
+	compare("asa", "astra giurgiu", freqMap);
+	compare("rapid bucuresti", "steaua bucuresti", freqMap);
+	compare("bucharest", "bucuresti", freqMap);
+	compare("rapid bucharest", "rapid bucuresti", freqMap);
 
-	sc = StrComp("rapid bucuresti", "steaua bucuresti");
-	std::cout << sc.getS1() << " [vs] " << sc.getS2() << ":\n";
-	res = sc.getStats();
-	std::cout << "[FM OFF]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-	res = sc.getStats(&freqMap);
-	std::cout << "[FM ON ]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-
-	sc = StrComp("bucharest", "bucuresti");
-	std::cout << sc.getS1() << " [vs] " << sc.getS2() << ":\n";
-	res = sc.getStats();
-	std::cout << "[FM OFF]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-	res = sc.getStats(&freqMap);
-	std::cout << "[FM ON ]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-
-	sc = StrComp("rapid bucharest", "rapid bucuresti");
-	std::cout << sc.getS1() << " [vs] " << sc.getS2() << ":\n";
-	res = sc.getStats();
-	std::cout << "[FM OFF]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
-	res = sc.getStats(&freqMap);
-	std::cout << "[FM ON ]" << res.identicalWords << "\t" << res.identicalWordsNormalized << "\t" << res.relativeWordResemblance << "\n\n";
+//	freqMap.debugPrint(std::cout);
 }

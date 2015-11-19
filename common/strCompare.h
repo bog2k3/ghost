@@ -28,7 +28,7 @@ public:
 	};
 
 	StrComp(std::string const& s1, std::string const& s2);
-	Result getStats(WordFreqMap* pFreqMap = nullptr);	// provide a WordFreqMap in order to get more relevant results (common words have a smaller weight in comparison than rarer words)
+	Result getStats(const WordFreqMap* pFreqMap = nullptr);	// provide a WordFreqMap in order to get more relevant results (common words have a smaller weight in comparison than rarer words)
 	std::string const& getS1() { return s1; }
 	std::string const& getS2() { return s2; }
 
