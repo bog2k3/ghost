@@ -26,8 +26,10 @@
 #include <cstring>
 #include <unistd.h>
 
-constexpr float idWordNorm_thresh = 0.55f;	// threshold for StrComp::Result::identicalWordsNormalized
-constexpr float wordResemb_thresh = 0.75f;	// threshold for StrComp::Result::relativeWordResemblance
+bool acceptCondition(StrComp::Result const& res) {
+	constexpr float accept_thresh_idrwr = 0.75f;
+	return res.identicalWords >= 1 && res.identicalWords * res.relativeWordResemblance >= accept_thresh_idrwr;
+}
 
 // numele argumentelor de pe cmd line:
 struct {
@@ -133,13 +135,12 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
 				if (r2.statusTrad == 0) {
 					// ambele echipe din r2 sunt traduse, de vis :-)
-					std::string *pEchiv = (*pTrad == r2.echipa1) ? r2.echipa2 : ((*pTrad == r2.echipa2) ? r2.echipa1 : nullptr);
+					std::string *pEchiv = (*pTrad == r2.echipa1) ? &r2.echipa2 : ((*pTrad == r2.echipa2) ? &r2.echipa1 : nullptr);
 					if (pEchiv) {
 						// inseamna ca pNetrad trebuie sa fie echivalenta cu r2.echipa1 sau r2.echipa2
 						StrComp comp(*pNetrad, *pEchiv);
 						auto cstat = comp.getStats();
-						if ((cstat.identicalWordsNormalized > idWordNorm_thresh) ||
-							(cstat.relativeWordResemblance > wordResemb_thresh)) {
+						if (acceptCondition(cstat)) {
 							// OK
 							lf.addNewAlias(*pEchiv, *pNetrad);
 						} else {
@@ -158,8 +159,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 						// avem o echipa comuna si aceeasi data => si cealalata TREBUIE sa fie aceeasi
 						StrComp scomp(*pR2Netrad, *pNetrad);
 						auto cstat = scomp.getStats();
-						if ((cstat.identicalWordsNormalized > idWordNorm_thresh) ||
-							(cstat.relativeWordResemblance > wordResemb_thresh)) {
+						if (acceptCondition(cstat)) {
 							// OK
 							lf.addNewAlias(*pNetrad, *pR2Netrad);
 						} else {
@@ -178,7 +178,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 						StrComp scB(*pR2Trad, *pNetrad);
 						auto statA = scA.getStats();
 						auto statB = scB.getStats();
-						decltype(statA) *statBig = &statA, *statSmall = statB;
+						decltype(statA) *statBig = &statA, *statSmall = &statB;
 						// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
 						// si interschimbam daca nu:
 						if (statBig->identicalWordsNormalized == 0) {
@@ -192,13 +192,14 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 							statBig = statSmall;
 							statSmall = aux;
 						}
-						if (statBig->identicalWordsNormalized < idWordNorm_thresh) {
-							if (statBig->relativeWordResemblance < wordResemb_thresh)
-								// nu pare sa fie acelasi meci, trecem mai departe
-								continue;
+						if (!acceptCondition(*statBig)) {
+							// nu pare sa fie acelasi meci, trecem mai departe
+							continue;
 						}
 						// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
-						if (statSmall)
+						if (!acceptCondition(*statSmall)) {
+							// dubios, trebuie dat mail
+						}
 					}
 				}
 				break;
