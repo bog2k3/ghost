@@ -80,14 +80,16 @@ int main(int argc, char* argv[]) {
 	std::sort(res.begin(), res.end(), [](StrComp::Result const&r1, StrComp::Result const& r2) {
 		return r1.relativeWordResemblance*r1.identicalWords > r2.relativeWordResemblance*r2.identicalWords;
 	});
-	std::cout << "ACCEPTATE-----------------------------------------\n\n";
-	double last_val = res[0].identicalWords*res[0].relativeWordResemblance;
-	double accept_thresh = 0.6;
+	std::cout << "ACCEPTATE---------------------------------------------------------------\n\n";
+	double accept_thresh = 0.55;
+	bool none_rejected = true;
 	for (int i=0; i<100; i++) {
 		double crtVal = res[i].identicalWords * res[i].relativeWordResemblance;
-		if (last_val >= accept_thresh && crtVal < accept_thresh)
-			std::cout << "\nREJECTATE------------------------------------------\n\n";
-		last_val = crtVal;
+		bool accept = crtVal >= accept_thresh && res[i].identicalWords >= 1;
+		if (!accept && none_rejected) {
+			std::cout << "\nREJECTATE-------------------------------------------------------------------\n\n";
+			none_rejected = false;
+		}
 		printRes(res[i]);
 	}
 
