@@ -26,7 +26,8 @@ void printRes(StrComp::Result const& res) {
 	std::cout << res.s1 << " [vs] " << res.s2 << ":\n";
 #endif
 	std::cout <<"idw:"<< res.identicalWords << "\tidw%:" << res.identicalWordsPercentage*100
-			<< "\trwr:" << res.relativeWordResemblance << "\n\n";
+			<< "\trwr:" << res.relativeWordResemblance << "\trwr*idw: " << res.relativeWordResemblance * res.identicalWords
+			<< "\n\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -60,19 +61,18 @@ int main(int argc, char* argv[]) {
 //	freqMap.addWordList(simpleWordList);
 
 
-//	printRes(compare("caransebes", "rehden", freqMap));
+//	printRes(compare("bucharest", "bucuresti", freqMap));
 //	printRes(compare("asa", "asa bcd", freqMap));
 //	printRes(compare("asa", "asa bcde", freqMap));
 //	printRes(compare("asa mures", "asa targu mures", freqMap));
 //	printRes(compare("asa", "asa targu mures", freqMap));
 //	printRes(compare("asa", "astra giurgiu", freqMap));
 //	printRes(compare("rapid bucuresti", "steaua bucuresti", freqMap));
-//	printRes(compare("bucharest", "bucuresti", freqMap));
 //	printRes(compare("rapid bucharest", "rapid bucuresti", freqMap));
 
 	std::srand(time(nullptr));
 	std::vector<StrComp::Result> res;
-	for (int i=0; i<1000; i++) {
+	for (int i=0; i<2000; i++) {
 		auto e1 = echipe[std::rand() * (echipe.size()-1) / RAND_MAX];
 		auto e2 = echipe[std::rand() * (echipe.size()-1) / RAND_MAX];
 		res.push_back(compare(e1, e2, freqMap));
@@ -80,8 +80,16 @@ int main(int argc, char* argv[]) {
 	std::sort(res.begin(), res.end(), [](StrComp::Result const&r1, StrComp::Result const& r2) {
 		return r1.relativeWordResemblance*r1.identicalWords > r2.relativeWordResemblance*r2.identicalWords;
 	});
-	for (int i=0; i<100; i++)
+	std::cout << "ACCEPTATE-----------------------------------------\n\n";
+	double last_val = res[0].identicalWords*res[0].relativeWordResemblance;
+	double accept_thresh = 0.6;
+	for (int i=0; i<100; i++) {
+		double crtVal = res[i].identicalWords * res[i].relativeWordResemblance;
+		if (last_val >= accept_thresh && crtVal < accept_thresh)
+			std::cout << "\nREJECTATE------------------------------------------\n\n";
+		last_val = crtVal;
 		printRes(res[i]);
+	}
 
 
 //	freqMap.debugPrint(std::cout);
