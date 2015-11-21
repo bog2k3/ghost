@@ -272,7 +272,7 @@ int main(int argc, char* argv[]) {
 
 	ISQLSock *pSock;
 #ifdef DUMMY_SQL_SOCKET
-	DummySQLSock dummySqlSock("test-maimuza");
+	DummySQLSock dummySqlSock("test-maimutza");
 	pSock = &dummySqlSock;
 #else
 	SQLSock sqlSock;
