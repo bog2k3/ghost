@@ -27,6 +27,8 @@ DummySQLSock::DummySQLSock(const char* filePath) {
 	}
 	std::string l;
 	while (std::getline(f, l)) {
+		if (l.empty())
+			continue;
 		auto valori = strSplit(l, ';');
 		insert(valori);
 	}
@@ -50,5 +52,5 @@ bool DummySQLSock::setDB(std::string const& databaseName) {
 }
 
 std::unique_ptr<sql::ResultSet> DummySQLSock::doQuery(std::string const& query) {
-
+	// here goes dragons - parse SQL syntax :-)
 }
