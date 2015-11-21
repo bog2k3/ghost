@@ -27,15 +27,6 @@
 #include <cstring>
 #include <unistd.h>
 
-double fitness(StrComp::Result const& res) {
-	return res.identicalWords * res.relativeWordResemblance;
-}
-
-bool acceptCondition(StrComp::Result const& res) {
-	constexpr float accept_thresh_idrwr = 0.75f;
-	return res.identicalWords >= 1 && fitness(res)  >= accept_thresh_idrwr;
-}
-
 // numele argumentelor de pe cmd line:
 struct {
 	const std::string table {"table"};
@@ -57,6 +48,15 @@ struct meciInfo {
 	std::string data;
 	int statusTrad;
 };
+
+double fitness(StrComp::Result const& res) {
+	return res.identicalWords * res.relativeWordResemblance;
+}
+
+bool acceptCondition(StrComp::Result const& res) {
+	constexpr float accept_thresh_idrwr = 0.75f;
+	return res.identicalWords >= 1 && fitness(res)  >= accept_thresh_idrwr;
+}
 
 bool processNetrad(std::string const& a1, std::string const& a2,
 					std::string const& b1, std::string const& b2,
@@ -272,7 +272,7 @@ int main(int argc, char* argv[]) {
 
 	ISQLSock *pSock;
 #ifdef DUMMY_SQL_SOCKET
-	DummySQLSock dummySqlSock("test-maimuța");
+	DummySQLSock dummySqlSock("test-maimuza");
 	pSock = &dummySqlSock;
 #else
 	SQLSock sqlSock;
