@@ -58,6 +58,37 @@ struct meciInfo {
 	int statusTrad;
 };
 
+bool processNetrad(std::string const& a1, std::string const& a2,
+					std::string const& b1, std::string const& b2,
+					listFile &lf,
+					std::vector<std::pair<std::string, std::string>> &dubioase) {
+	StrComp scA(a1, b1);
+	StrComp scB(a2, b2);
+	auto statA = scA.getStats();
+	auto statB = scB.getStats();
+	decltype(statA) *statBig = &statA, *statSmall = &statB;
+	// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
+	// si interschimbam daca nu:
+	if (fitness(*statBig) < fitness(*statSmall)) {
+		decltype(statBig) aux = statBig;
+		statBig = statSmall;
+		statSmall = aux;
+	}
+	if (!acceptCondition(*statBig)) {
+		// nu pare sa fie acelasi meci, trecem mai departe
+		return false;
+	}
+	// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
+	if (!acceptCondition(*statSmall)) {
+		std::string &s1r = statSmall == &statA ? statA.s1 : statB.s1;
+		std::string &s2r = statSmall == &statA ? statA.s2 : statB.s2;
+		dubioase.push_back(std::make_pair(s1r, s2r));
+	}
+	lf.addNewAlias(a1, b1);
+	lf.addNewAlias(a2, b2);
+	return true;
+}
+
 bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 		std::vector<std::pair<std::string, std::string>> &dubioase,
 		std::vector<meciInfo> *postponed) {
@@ -68,7 +99,16 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 			postponed->push_back(crt);
 			return true;
 		}
-
+		// try a1 vs b1 & a2 vs b2
+		// then a1 vs b2 & a2 vs b1
+		for (int cross=0; cross<2; cross++) {
+			if (cross) {
+				if (processNetrad(crt.echipa1, crt.echipa2, r2.echipa1, r2.echipa2, lf, dubioase))
+					return true;
+			} else if (processNetrad(crt.echipa2, crt.echipa1, r2.echipa1, r2.echipa2, lf, dubioase))
+				return true;
+		}
+		return false;
 		break;
 	case 2:
 	case 1:
@@ -104,36 +144,13 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 					// e dubios, nu prea se potriveste, dam warning pe mail
 					dubioase.push_back(std::make_pair(*pNetrad, *pR2Netrad));
 				}
+				return true;
 			} else {
 				// s-ar putea ca fiecare echipa tradusa sa fie echivalenta cu cea netradusa, verificam:
 				// A: pTrad vs pR2Netrad
 				// B: pNetrad vs pR2Trad
-				StrComp scA(*pTrad, *pR2Netrad);
-				StrComp scB(*pR2Trad, *pNetrad);
-				auto statA = scA.getStats();
-				auto statB = scB.getStats();
-				decltype(statA) *statBig = &statA, *statSmall = &statB;
-				// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
-				// si interschimbam daca nu:
-				if (fitness(*statBig) < fitness(*statSmall)) {
-					decltype(statBig) aux = statBig;
-					statBig = statSmall;
-					statSmall = aux;
-				}
-				if (!acceptCondition(*statBig)) {
-					// nu pare sa fie acelasi meci, trecem mai departe
-					return false;
-				}
-				// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
-				if (!acceptCondition(*statSmall)) {
-					std::string &s1r = statSmall == &statA ? statA.s1 : statB.s1;
-					std::string &s2r = statSmall == &statA ? statA.s2 : statB.s2;
-					dubioase.push_back(std::make_pair(s1r, s2r));
-				}
-				lf.addNewAlias(*pTrad, *pR2Netrad);
-				lf.addNewAlias(*pR2Trad, *pNetrad);
+				return processNetrad(*pTrad, *pNetrad, *pR2Netrad, *pR2Trad, lf, dubioase);
 			}
-			return true;
 		}
 		break;
 	}
