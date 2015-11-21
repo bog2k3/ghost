@@ -13,6 +13,7 @@
 #include "../common/cmdLine.h"
 #include "../common/log.h"
 #include "../common/dbLabels.h"
+#include "../common/assert.h"
 #ifdef DUMMY_SQL_SOCKET
 #include "../common/DummySQLSock.h"
 #else
@@ -26,9 +27,13 @@
 #include <cstring>
 #include <unistd.h>
 
+double fitness(StrComp::Result const& res) {
+	return res.identicalWords * res.relativeWordResemblance;
+}
+
 bool acceptCondition(StrComp::Result const& res) {
 	constexpr float accept_thresh_idrwr = 0.75f;
-	return res.identicalWords >= 1 && res.identicalWords * res.relativeWordResemblance >= accept_thresh_idrwr;
+	return res.identicalWords >= 1 && fitness(res)  >= accept_thresh_idrwr;
 }
 
 // numele argumentelor de pe cmd line:
@@ -45,6 +50,96 @@ struct {
 	const std::string dbPassw {"passw"};
 	const std::string dbName {"database"};
 } config;
+
+struct meciInfo {
+	std::string echipa1;
+	std::string echipa2;
+	std::string data;
+	int statusTrad;
+};
+
+bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
+		std::vector<std::pair<std::string, std::string>> &dubioase,
+		std::vector<meciInfo> *postponed) {
+	switch (crt.statusTrad) {
+	case 3:
+		// nici o echipa din crt nu e tradusa, aici e cam naspa
+		if (postponed) {
+			postponed->push_back(crt);
+			return true;
+		}
+
+		break;
+	case 2:
+	case 1:
+		// o echipa din crt nu e tradusa
+		const std::string* pTrad = crt.statusTrad == 1 ? &crt.echipa2 : &crt.echipa1;
+		const std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
+		if (r2.statusTrad == 0) {
+			// ambele echipe din r2 sunt traduse, de vis :-)
+			const std::string *pEchiv = (*pTrad == r2.echipa1) ? &r2.echipa2 : ((*pTrad == r2.echipa2) ? &r2.echipa1 : nullptr);
+			if (pEchiv) {
+				// inseamna ca pNetrad trebuie sa fie echivalenta cu r2.echipa1 sau r2.echipa2
+				StrComp comp(*pNetrad, *pEchiv);
+				auto cstat = comp.getStats();
+				lf.addNewAlias(*pEchiv, *pNetrad);
+				if (!acceptCondition(cstat)) {
+					// e dubios, nu prea se potriveste, dam warning pe mail
+					dubioase.push_back(std::make_pair(*pEchiv, *pNetrad));
+				}
+				return true;
+			} else
+				return false; // r2 nu e acelasi meci, chiar daca e in acelasi timp
+		} else {
+			// una dintre ecihpele din r2 nu e tradusa
+			const std::string* pR2Trad = r2.statusTrad == 1 ? &r2.echipa2 : &r2.echipa1;
+			const std::string* pR2Netrad = r2.statusTrad == 1 ? &r2.echipa1 : &r2.echipa2;
+			if (*pR2Trad == *pTrad) {
+				// avem o echipa comuna si aceeasi data => si cealalata TREBUIE sa fie aceeasi
+				// adica => *pR2Netrad == *pNetrad
+				StrComp scomp(*pR2Netrad, *pNetrad);
+				auto cstat = scomp.getStats();
+				lf.addNewAlias(*pNetrad, *pR2Netrad);
+				if (!acceptCondition(cstat)) {
+					// e dubios, nu prea se potriveste, dam warning pe mail
+					dubioase.push_back(std::make_pair(*pNetrad, *pR2Netrad));
+				}
+			} else {
+				// s-ar putea ca fiecare echipa tradusa sa fie echivalenta cu cea netradusa, verificam:
+				// A: pTrad vs pR2Netrad
+				// B: pNetrad vs pR2Trad
+				StrComp scA(*pTrad, *pR2Netrad);
+				StrComp scB(*pR2Trad, *pNetrad);
+				auto statA = scA.getStats();
+				auto statB = scB.getStats();
+				decltype(statA) *statBig = &statA, *statSmall = &statB;
+				// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
+				// si interschimbam daca nu:
+				if (fitness(*statBig) < fitness(*statSmall)) {
+					decltype(statBig) aux = statBig;
+					statBig = statSmall;
+					statSmall = aux;
+				}
+				if (!acceptCondition(*statBig)) {
+					// nu pare sa fie acelasi meci, trecem mai departe
+					return false;
+				}
+				// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
+				if (!acceptCondition(*statSmall)) {
+					std::string &s1r = statSmall == &statA ? statA.s1 : statB.s1;
+					std::string &s2r = statSmall == &statA ? statA.s2 : statB.s2;
+					dubioase.push_back(std::make_pair(s1r, s2r));
+				}
+				lf.addNewAlias(*pTrad, *pR2Netrad);
+				lf.addNewAlias(*pR2Trad, *pNetrad);
+			}
+			return true;
+		}
+		break;
+	}
+	assertDbg(false); // nu ar trebui sa ajunga aici
+	return false;
+}
 
 void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& listePath) {
 	// 1. incarcam listele:
@@ -65,147 +160,77 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 			" WHERE " + dbLabels.statusTraduceri + " != 0"+
 			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");
 
-	struct meciInfo {
-		std::string echipa1;
-		std::string echipa2;
-		std::string data;
-		int statusTrad;
-	};
-
 	std::vector<std::pair<std::string, std::string>> dubioase;
+	std::vector<meciInfo> postponed;
 
-	// 3. parcurgem meciurile netraduse si incercam sa gasim traduceri:
-	while (res->next()) {
-		meciInfo crt;
-		crt.echipa1 = res->getString(dbLabels.echipa1);
-		crt.echipa2 = res->getString(dbLabels.echipa2);
-		crt.data = res->getString(dbLabels.data);
-		crt.statusTrad = res->getInt(dbLabels.statusTraduceri);
+	for (int pas=0; pas < 2; pas++) {
 
-		// cautam meciuri simultane ca sa incercam sa traducem echipele:
-		auto res2 = sock.doQuery(
-			"SELECT "+
-			dbLabels.echipa1+","+
-			dbLabels.echipa2+","+
-			dbLabels.statusTraduceri+
-			" FROM " + tabel +
-			" WHERE " + dbLabels.data + " = \""+crt.data+"\" "+
-			" AND " + dbLabels.statusTraduceri + " != 3"+
-			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
+		std::vector<meciInfo> crtList;
+		// la pas==1 cerem meciurile din db netraduse
+		// la pas==2 folosim meciurile postponed
 
-		/* !!! algoritmu descris aici e mai vechi, nu e chiar exact implementat, dar cat de cat:
-		 *
-		 * 1. punem toate meciurile returnate in res2 intr-un vector
-		 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		 *  !!! PRESUPUNEM CA ECHIPELE DIN ORICE MECI SUNT SORTATE IN ORDINE ALFABETICA (ECHIPA1 < ECHIPA2)
-		 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		 * 2. verificam care dintre echipe nu e tradusa (dupa status)
-		 * 3. parcurgem vectorul si in cazul in care una dintre echipe este tradusa, eliminam meciurile care au echipa respectiva diferita
-		 * 4a. DACA 1 echipa nu e tradusa:
-		 * 		- comparam aproximativ echipa de tradus cu echipa2 din fiecare meci din vector; daca similaritatea e suficienta,
-		 * 			consideram ca e aceeasi echipa (un threshold de similaritate)
-		 * 		- adaugam intr-o lista temporara
-		 * 4b. DACA nici una din echipe nu e tradusa:
-		 * 		- la fel, doar ca fiecare dintre echipe trebuie sa depaseasca thresh-ul de similaritate simultan
-		 * 5. parcurgem lista/listele temporara si incercam sa identificam in ea un element care exista in lista de echipe;
-		 * 6a. DACA am gasit un element din lista de echipe, le adaugam pe celelalte (care nu sunt traduse) ca alternative la echipa respectiva
-		 * 		in lista
-		 * 6b. ALTFEL alegem cel mai lung element sa fie cheie, il introducem pe o linie noua in lista de echipe, si pe celelalte ca alternative
-		 *
-		 * 7. DACA nici o alta echipa nu a fost similara (caz singular), trimitem un email cu echipa respectiva (eventual concatenam toate
-		 * 		echipele care nu au putut fi traduse intr-un email)
-		 */
+		// 3. parcurgem meciurile netraduse si incercam sa gasim traduceri:
+		if (pas == 1)
+			while (res->next()) {
+				meciInfo crt;
+				crt.echipa1 = res->getString(dbLabels.echipa1);
+				crt.echipa2 = res->getString(dbLabels.echipa2);
+				crt.data = res->getString(dbLabels.data);
+				crt.statusTrad = res->getInt(dbLabels.statusTraduceri);
 
-
-		while (res2->next()) {
-			meciInfo r2;
-			r2.echipa1 = res2->getString(dbLabels.echipa1);
-			r2.echipa2 = res2->getString(dbLabels.echipa2);
-			r2.data = res2->getString(dbLabels.data);
-			r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
-
-			switch (crt.statusTrad) {
-			case 3:
-				// nici o echipa din crt nu e tradusa, aici e cam naspa
-				break;
-			case 2:
-			case 1:
-				// o echipa din crt nu e tradusa
-				std::string* pTrad = crt.statusTrad == 1 ? &crt.echipa2 : &crt.echipa1;
-				std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
-				if (r2.statusTrad == 0) {
-					// ambele echipe din r2 sunt traduse, de vis :-)
-					std::string *pEchiv = (*pTrad == r2.echipa1) ? &r2.echipa2 : ((*pTrad == r2.echipa2) ? &r2.echipa1 : nullptr);
-					if (pEchiv) {
-						// inseamna ca pNetrad trebuie sa fie echivalenta cu r2.echipa1 sau r2.echipa2
-						StrComp comp(*pNetrad, *pEchiv);
-						auto cstat = comp.getStats();
-						if (acceptCondition(cstat)) {
-							// OK
-							lf.addNewAlias(*pEchiv, *pNetrad);
-						} else {
-							// e dubios, nu prea se potriveste, dam warning pe mail
-							dubioase.push_back(std::make_pair(*pEchiv, *pNetrad));
-							// adaugam si ca alias totusi, in caz ca e naspa doar stergem, nu stam sa le adaugam de mana pe toate dubioase
-							lf.addNewAlias(*pEchiv, *pNetrad);
-						}
-					} else
-						continue; // r2 nu e acelasi meci, chiar daca e in acelasi timp
-				} else {
-					// una dintre ecihpele din r2 nu e tradusa
-					std::string* pR2Trad = r2.statusTrad == 1 ? &r2.echipa2 : &r2.echipa1;
-					std::string* pR2Netrad = r2.statusTrad == 1 ? &r2.echipa1 : &r2.echipa2;
-					if (*pR2Trad == *pTrad) {
-						// avem o echipa comuna si aceeasi data => si cealalata TREBUIE sa fie aceeasi
-						StrComp scomp(*pR2Netrad, *pNetrad);
-						auto cstat = scomp.getStats();
-						if (acceptCondition(cstat)) {
-							// OK
-							lf.addNewAlias(*pNetrad, *pR2Netrad);
-						} else {
-							// e dubios, nu prea se potriveste, dam warning pe mail
-							dubioase.push_back(std::make_pair(*pNetrad, *pR2Netrad));
-							// adaugam si ca alias totusi, in caz ca e naspa doar stergem, nu stam sa le adaugam de mana pe toate dubioase
-							lf.addNewAlias(*pNetrad, *pR2Netrad);
-						}
-						// adica => *pR2Netrad == *pNetrad    -> avem inregistrare noua aici, alegem pe cea mai lunga ca cheie
-						// verificam cu StrComp si daca potrivirea e mica, dam warning pe mail
-					} else {
-						// s-ar putea ca fiecare echipa tradusa sa fie echivalenta cu cea netradusa, verificam:
-						// A: pTrad vs pR2Netrad
-						// B: pNetrad vs pR2Trad
-						StrComp scA(*pTrad, *pR2Netrad);
-						StrComp scB(*pR2Trad, *pNetrad);
-						auto statA = scA.getStats();
-						auto statB = scB.getStats();
-						decltype(statA) *statBig = &statA, *statSmall = &statB;
-						// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
-						// si interschimbam daca nu:
-						if (statBig->identicalWordsNormalized == 0) {
-							if (statBig->relativeWordResemblance < statSmall->relativeWordResemblance) {
-								decltype(statBig) aux = statBig;
-								statBig = statSmall;
-								statSmall = aux;
-							}
-						} else if (statBig->identicalWordsNormalized < statSmall->identicalWordsNormalized) {
-							decltype(statBig) aux = statBig;
-							statBig = statSmall;
-							statSmall = aux;
-						}
-						if (!acceptCondition(*statBig)) {
-							// nu pare sa fie acelasi meci, trecem mai departe
-							continue;
-						}
-						// pare sa fie acelasi meci, TREBUIE sa se potriveasca si celelalte echipe, altfel e dubios:
-						if (!acceptCondition(*statSmall)) {
-							// dubios, trebuie dat mail
-						}
-					}
-				}
-				break;
+				crtList.push_back(crt);
 			}
-		}
-	}
+		else
+			crtList.swap(postponed);
+
+		for (auto crt : crtList) {
+			// cautam meciuri simultane ca sa incercam sa traducem echipele:
+			auto res2 = sock.doQuery(
+				"SELECT "+
+				dbLabels.echipa1+","+
+				dbLabels.echipa2+","+
+				dbLabels.statusTraduceri+
+				" FROM " + tabel +
+				" WHERE " + dbLabels.data + " = \""+crt.data+"\" "+
+				" AND " + dbLabels.statusTraduceri + " != 3"+
+				" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
+
+			/* !!! algoritmu descris aici e mai vechi, nu e chiar exact implementat, dar cat de cat:
+			 *
+			 * 1. punem toate meciurile returnate in res2 intr-un vector
+			 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			 *  !!! PRESUPUNEM CA ECHIPELE DIN ORICE MECI SUNT SORTATE IN ORDINE ALFABETICA (ECHIPA1 < ECHIPA2)
+			 *		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			 * 2. verificam care dintre echipe nu e tradusa (dupa status)
+			 * 3. parcurgem vectorul si in cazul in care una dintre echipe este tradusa, eliminam meciurile care au echipa respectiva diferita
+			 * 4a. DACA 1 echipa nu e tradusa:
+			 * 		- comparam aproximativ echipa de tradus cu echipa2 din fiecare meci din vector; daca similaritatea e suficienta,
+			 * 			consideram ca e aceeasi echipa (un threshold de similaritate)
+			 * 		- adaugam intr-o lista temporara
+			 * 4b. DACA nici una din echipe nu e tradusa:
+			 * 		- la fel, doar ca fiecare dintre echipe trebuie sa depaseasca thresh-ul de similaritate simultan
+			 * 5. parcurgem lista/listele temporara si incercam sa identificam in ea un element care exista in lista de echipe;
+			 * 6a. DACA am gasit un element din lista de echipe, le adaugam pe celelalte (care nu sunt traduse) ca alternative la echipa respectiva
+			 * 		in lista
+			 * 6b. ALTFEL alegem cel mai lung element sa fie cheie, il introducem pe o linie noua in lista de echipe, si pe celelalte ca alternative
+			 *
+			 * 7. DACA nici o alta echipa nu a fost similara (caz singular), trimitem un email cu echipa respectiva (eventual concatenam toate
+			 * 		echipele care nu au putut fi traduse intr-un email)
+			 */
+
+			while (res2->next()) {
+				meciInfo r2;
+				r2.echipa1 = res2->getString(dbLabels.echipa1);
+				r2.echipa2 = res2->getString(dbLabels.echipa2);
+				r2.data = res2->getString(dbLabels.data);
+				r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
+
+				process(crt, r2, lf, dubioase, pas == 1 ? &postponed : nullptr);
+			}
+		} // for crt
+	} // for pas
+
+	// TODO dat mail cu vec dubioase.
 }
 
 int main(int argc, char* argv[]) {
