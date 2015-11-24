@@ -1,116 +1,142 @@
-/*
- * main.cpp
+#include <stdio.h>
+#include <string.h>
+#include <curl/curl.h>
+
+/* This is a simple example showing how to send mail using libcurl's SMTP
+ * capabilities. It builds on the smtp-mail.c example to add authentication
+ * and, more importantly, transport security to protect the authentication
+ * details from being snooped.
  *
- *  Created on: Nov 13, 2015
- *      Author: bog
+ * Note that this example requires libcurl 7.20.0 or above.
  */
 
-#include "../common/strManip.h"
-#include "../common/strCompare.h"
-#include "../common/wordFreq.h"
-#include "../common/log.h"
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <vector>
-#include <set>
-#include <algorithm>
+#define FROM "read-from-config"
+#define TO1  "read-from-config"
+#define TO2  "read-from-config"
 
-StrComp::Result compare(std::string const& s1, std::string const& s2, WordFreqMap const& freqMap) {
-	StrComp sc(s1, s2);
-	return sc.getStats(&freqMap);
-}
-
-void printRes(StrComp::Result const& res) {
-#ifdef DEBUG
-	std::cout << res.s1 << " [vs] " << res.s2 << ":\n";
+static const char *payload_text[] =
+		{ "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n",
+				"To: \"The Bosses\":" TO1 "," TO2 ";\r\n",
+				"From: \"Maimutza\" " FROM "\r\n",
+#ifdef CC
+				"Cc: " CC "(poison)\r\n",
 #endif
-	std::cout <<"idw:"<< res.identicalWords << "\tidw%:" << res.identicalWordsPercentage*100
-			<< "\trwr:" << res.relativeWordResemblance << "\trwr*idw: " << res.relativeWordResemblance * res.identicalWords
-			<< "\n\n";
+//				"Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n",
+				"Subject: test Maimuță\r\n",
+				"\r\n", /* empty line to divide headers from body, see RFC5322 */
+				"Salutari de la maimuță\r\n",
+				NULL };
+
+struct upload_status {
+	int lines_read;
+};
+
+static size_t payload_source(void *ptr, size_t size, size_t nmemb,
+		void *userp) {
+	struct upload_status *upload_ctx = (struct upload_status *) userp;
+	const char *data;
+
+	if ((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
+		return 0;
+	}
+
+	data = payload_text[upload_ctx->lines_read];
+
+	if (data) {
+		size_t len = strlen(data);
+		memcpy(ptr, data, len);
+		upload_ctx->lines_read++;
+
+		return len;
+	}
+
+	return 0;
 }
 
-int main(int argc, char* argv[]) {
-	LOGPREFIX("test");
+int main(void) {
+	CURL *curl;
+	CURLcode res = CURLE_OK;
+	struct curl_slist *recipients = NULL;
+	struct upload_status upload_ctx;
 
-	std::ifstream f("../liste/fotbal");
-	if (!f.is_open()) {
-		ERROR("open file!");
-		return -1;
+	upload_ctx.lines_read = 0;
+
+	curl = curl_easy_init();
+	if (curl) {
+		/* Set username and password */
+		curl_easy_setopt(curl, CURLOPT_USERNAME, read-from-config);
+		curl_easy_setopt(curl, CURLOPT_PASSWORD, read-from-config);
+
+		/* This is the URL for your mailserver. Note the use of smtps:// rather
+		 * than smtp:// to request a SSL based connection. */
+		curl_easy_setopt(curl, CURLOPT_URL, read-from-config);
+		curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+
+		/* If you want to connect to a site who isn't using a certificate that is
+		 * signed by one of the certs in the CA bundle you have, you can skip the
+		 * verification of the server's certificate. This makes the connection
+		 * A LOT LESS SECURE.
+		 *
+		 * If you have a CA cert for the server stored someplace else than in the
+		 * default bundle, then the CURLOPT_CAPATH option might come handy for
+		 * you. */
+#ifdef SKIP_PEER_VERIFICATION
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+#endif
+
+		/* If the site you're connecting to uses a different host name that what
+		 * they have mentioned in their server certificate's commonName (or
+		 * subjectAltName) fields, libcurl will refuse to connect. You can skip
+		 * this check, but this will make the connection less secure. */
+#ifdef SKIP_HOSTNAME_VERIFICATION
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+#endif
+
+		/* Note that this option isn't strictly required, omitting it will result in
+		 * libcurl sending the MAIL FROM command with empty sender data. All
+		 * autoresponses should have an empty reverse-path, and should be directed
+		 * to the address in the reverse-path which triggered them. Otherwise, they
+		 * could cause an endless loop. See RFC 5321 Section 4.5.5 for more details.
+		 */
+		curl_easy_setopt(curl, CURLOPT_MAIL_FROM, FROM);
+
+		/* Add two recipients, in this particular case they correspond to the
+		 * To: and Cc: addressees in the header, but they could be any kind of
+		 * recipient. */
+		recipients = curl_slist_append(recipients, TO1);
+		recipients = curl_slist_append(recipients, TO2);
+#ifdef CC
+		recipients = curl_slist_append(recipients, CC);
+#endif
+		curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, recipients);
+
+		/* We're using a callback function to specify the payload (the headers and
+		 * body of the message). You could just use the CURLOPT_READDATA option to
+		 * specify a FILE pointer to read from. */
+		curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+		curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
+		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+
+		/* Since the traffic will be encrypted, it is very useful to turn on debug
+		 * information within libcurl to see what is happening during the
+		 * transfer */
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+		/* Send the message */
+		res = curl_easy_perform(curl);
+
+		/* Check for errors */
+		if (res != CURLE_OK)
+			fprintf(stderr, "curl_easy_perform() failed: %s\n",
+					curl_easy_strerror(res));
+
+		/* Free the list of recipients */
+		curl_slist_free_all(recipients);
+
+		/* Always cleanup */
+		curl_easy_cleanup(curl);
+
 	}
-	std::vector<std::string> wordList;
-	std::vector<std::string> echipe;
-	std::string line;
-	while (std::getline(f, line)) {
-		std::vector<std::string> words = strSplit(line, {' ', ';'});
-		auto echipeLinie = strSplit(line, ';');
-		echipe.insert(echipe.end(), echipeLinie.begin(), echipeLinie.end());
-		std::set<std::string> uniqueWords;
-		for (auto w : words) {
-			uniqueWords.insert(w);
-		}
-		words.clear();
-		words.assign(uniqueWords.begin(), uniqueWords.end());
-		wordList.insert(wordList.end(), words.begin(), words.end());
-	}
-	std::vector<std::string> simpleWordList = {
-			"asa", "bcd", "astra", "targu", "mures","giurgiu","rapid","bucuresti","steaua","dinamo","bucharest"
-	}; // uniformFreq: f = 0.1
-	WordFreqMap freqMap;
-	freqMap.addWordList(wordList);
-//	freqMap.addWordList(simpleWordList);
 
-
-//	printRes(compare("bucharest", "bucuresti", freqMap));
-//	printRes(compare("asa", "asa bcd", freqMap));
-//	printRes(compare("asa", "asa bcde", freqMap));
-//	printRes(compare("asa mures", "asa targu mures", freqMap));
-//	printRes(compare("asa", "asa targu mures", freqMap));
-//	printRes(compare("asa", "astra giurgiu", freqMap));
-//	printRes(compare("rapid bucuresti", "steaua bucuresti", freqMap));
-//	printRes(compare("rapid bucharest", "rapid bucuresti", freqMap));
-
-	std::srand(time(nullptr));
-	std::vector<StrComp::Result> res;
-	for (int i=0; i<2000; i++) {
-		auto e1 = echipe[std::rand() * (echipe.size()-1) / RAND_MAX];
-		auto e2 = echipe[std::rand() * (echipe.size()-1) / RAND_MAX];
-		res.push_back(compare(e1, e2, freqMap));
-	}
-	std::sort(res.begin(), res.end(), [](StrComp::Result const&r1, StrComp::Result const& r2) {
-		return r1.relativeWordResemblance*r1.identicalWords > r2.relativeWordResemblance*r2.identicalWords;
-	});
-	std::cout << "ACCEPTATE---------------------------------------------------------------\n\n";
-	double accept_thresh = 0.55;
-	bool none_rejected = true;
-	for (int i=0; i<100; i++) {
-		double crtVal = res[i].identicalWords * res[i].relativeWordResemblance;
-		bool accept = crtVal >= accept_thresh && res[i].identicalWords >= 1;
-		if (!accept && none_rejected) {
-			std::cout << "\nREJECTATE-------------------------------------------------------------------\n\n";
-			none_rejected = false;
-		}
-		printRes(res[i]);
-	}
-
-
-//	freqMap.debugPrint(std::cout);
+	return (int) res;
 }
-
-/*
- PROBLEME:
-
-dacia unirea braila [vs] dacia unirea braila:
-idw:3	idwn:0.988235	idw%:100	rwr:1	rlr:1
-asa targu mures [vs] asa targu mures:
-idw:3	idwn:0.969231	idw%:100	rwr:1	rlr:1
-asa targu mures [vs] asa targu mures:
-idw:3	idwn:0.969231	idw%:100	rwr:1	rlr:1
-farul constanta [vs] farul constanta:
-idw:2	idwn:0.904762	idw%:100	rwr:1	rlr:1
-universitatea craiova [vs] universitatea craiova:
-idw:2	idwn:0.9	idw%:100	rwr:1	rlr:1
-braila [vs] baia mare:
-idw:1.06667	idwn:0.666667	idw%:53.3333	rwr:0.533333	rlr:0.666667
-
- */
