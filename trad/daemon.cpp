@@ -18,7 +18,7 @@
 //#define ENABLE_COSINE_MATCHING
 
 std::string getDataPath() {
-	return std::string(getenv("HOME")) + "/.maimutza/";
+	return std::string(getenv("HOME")) + "/.trad/";
 }
 std::string getCachePath() {
 	return getDataPath() + "cache/";

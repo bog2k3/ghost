@@ -16,9 +16,7 @@ class WordFreqMap;
 class StrComp {
 public:
 	struct Result {
-#ifdef DEBUG
 		std::string s1, s2;
-#endif
 		double relativeLetterResemblance = 0;	// how many identical letters relative to the total number of letters
 		double totalWordsAvg = 0;				// average of total words from s1 and s2
 		double relativeWordResemblance = 0;		// percentage that words in the two texts match 1:1
