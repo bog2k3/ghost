@@ -8,9 +8,30 @@
 #ifndef EMAILER_H_
 #define EMAILER_H_
 
+#include <string>
+#include <vector>
+#include <sstream>
+
 class EMailer {
 public:
-	EMailer() {}
+	EMailer(std::string const& smtpServer,		// smtp server address in the form smtp://my.server.org:52 or smtps://my.secure.server.org:465
+			std::string const& smtpUser,		// smtp user name for authentication
+			std::string const& smtpPassw,		// smtp user password for authentication
+			std::string const& smtpSenderAddr); // email address to use as <sender> (from: field) - MUST belong to the user, otherwise the SMTP server may refuse it
+
+	bool send(std::vector<std::string> const& destAddr,
+			std::string const& subject,
+			std::string const& body);
+
+	void setVerbose(bool verbose) { verbose_ = verbose; }
+
+private:
+	static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp);
+	void buildMsgBody(std::stringstream &ostream, std::vector<std::string> const& destAddr, std::string const& subject, std::string const& body);
+	std::string formatCrtDateTime();
+
+	std::string server_, user_, passw_, senderAddr_;
+	bool verbose_ = false;
 };
 
 
