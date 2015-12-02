@@ -4,10 +4,12 @@
  *
  * Dan : 6-octombrie-2015   : adaugare betcafearena
  *                          : bug - nu adaugam si data meciului
+ *                          : adaugat publicbet
  */
 
 // stanley
 // betcafearena
+// public bet
 
 function meci_fotbal() {
     
@@ -22,6 +24,10 @@ function meci_fotbal() {
     this.data=""; // data trebuie formatata ca pe stanleybet zz/ll/aaaa
     this.cod="";
     this.site="";
+    
+    this.add_info_publicbet = function(table_line) {
+        
+    }
     
     this.add_info_betcafearena = function (header,body) {
         // ca si input se primeste un heaer de tip tr ce are mai multe TD'uri reprezentand textul cu cote si informatii

@@ -5,6 +5,13 @@ var betcafearena_day=0;
 // variabile pentru stanley
 var stanleybet_day=0;
 
+//variabile pentru publicbet
+// nu trebuie variabila de zi pentru ca baietii pun meciurile pe toata saptamana
+// asa ma frends
+//var publicbet_day=0;
+
+//variabile pentru superbet
+var superbet_day=0;
 
 function updatePageMessage(tabId,tab) 
 {
@@ -46,8 +53,19 @@ function(message,sender,sendResponse){
         } else {
             sendResponse({refresh:"false",day:stanleybet_day});
         }
+    } else
+    if (message.site === "PUBLICBET") {
+         sendResponse({refresh:"true"});
+    } else
+    if (message.site === "SUPERBET") {
+        superbet_day++;
+        if (superbet_day > 6) {
+            superbet_day=0;
+            sendResponse({refresh:"true",day:superbet_day});
+        } else {
+            sendResponse({refresh:"false",day:superbet_day});
+        }
     } 
     
-    // TODO set refresh si pentru stanley
 });
 

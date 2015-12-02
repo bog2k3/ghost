@@ -1,7 +1,7 @@
 {
 	"manifest_version" : 2,
 	"name" : "Sporting bet get info",
-	"version": "1.21",
+	"version": "1.30",
 
 	"browser_action": {
 		"default_icon": "icon.png"
@@ -20,6 +20,7 @@
                         "matches": ["https://*/*","http://*/*"],
                         "js": [ "jsthirdparty/jquery-1.11.3.min.js","js/setup.js",
                                 "js/fotbal/fotbal_class.js","js/fotbal/fotbal_parser_stanley.js","js/fotbal/fotbal_parser_betcafearena.js",
+                                "js/fotbal/fotbal_parser_publicbet.js","js/fotbal/fotbal_parser_superbet.js",
                                 "js/parse_page.js"],
 			"run_at": "document_end",
 			"all_frames": true
