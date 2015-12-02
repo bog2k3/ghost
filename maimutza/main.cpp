@@ -20,6 +20,8 @@
 #include "../common/SQLSock.h"
 #endif
 #include "../common/strCompare.h"
+#include "../common/strManip.h"
+#include "../common/eMailer.h"
 
 #include <iostream>
 #include <string>
@@ -40,6 +42,14 @@ struct {
 	const std::string dbUser {"user"};
 	const std::string dbPassw {"passw"};
 	const std::string dbName {"database"};
+
+	const std::string mailUser {"mail-user"};
+	const std::string mailPassw {"mail-passw"};
+	const std::string mailServer {"mail-server"};
+	const std::string mailSenderAddr {"mail-addr"};
+	const std::string mailFromName {"mail-from"};
+	const std::string mailSignature {"mail-signature"};
+	const std::string mailDestList {"mail-dest"};
 } config;
 
 struct meciInfo {
@@ -48,6 +58,9 @@ struct meciInfo {
 	std::string data;
 	int statusTrad;
 };
+
+EMailer *pEmailer {nullptr};
+std::vector<std::string> emailRecipients;
 
 double fitness(StrComp::Result const& res) {
 	return res.identicalWords * res.relativeWordResemblance;
@@ -247,7 +260,14 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		} // for crt
 	} // for pas
 
-	// TODO dat mail cu vec dubioase.
+	// dam mail cu echipele dubioase:
+	if (dubioase.size()) {
+		std::stringstream ss;
+		for (auto d : dubioase) {
+			ss << d.first << "   ?   " << d.second << "\r\n";
+		}
+		pEmailer->send(emailRecipients, "Match-uri DUBIOASE", ss.str());
+	}
 }
 
 int main(int argc, char* argv[]) {
@@ -265,10 +285,15 @@ int main(int argc, char* argv[]) {
 	}
 	std::map<std::string, std::string> configOpts;
 	if (!cmdOpts["config"].empty())
-		if (!parseConfigFile(cmdOpts["config"], configOpts, {config.dbURI, config.dbUser, config.dbPassw, config.dbName})) {
+		if (!parseConfigFile(cmdOpts["config"], configOpts, {config.dbURI, config.dbUser, config.dbPassw, config.dbName,
+				config.mailServer, config.mailUser, config.mailPassw, config.mailSenderAddr, config.mailDestList})) {
 			ERROR("maimuța nu poate continua (configurare incompleta)");
 			return -1;
 		}
+
+	pEmailer = new EMailer(configOpts[config.mailServer], configOpts[config.mailUser], configOpts[config.mailPassw],
+			configOpts[config.mailSenderAddr], configOpts[config.mailFromName], configOpts[config.mailSignature]);
+	emailRecipients = strSplit(configOpts[config.mailDestList], ',');
 
 	ISQLSock *pSock;
 #ifdef DUMMY_SQL_SOCKET
@@ -292,6 +317,9 @@ int main(int argc, char* argv[]) {
 
 		break;
 	}
+
+	delete pSock;
+	delete pEmailer;
 
 	return 0;
 }
