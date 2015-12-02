@@ -21,13 +21,15 @@ bool parseConfigFile(std::string const& filePath, std::map<std::string, std::str
 	std::string line;
 	try {
 		while (std::getline(f, line)) {
-			if (line.empty())
+			if (line.empty() || line[0] == '#')  // ignore comments and empty lines
 				continue;
 
 			std::stringstream ss(line);
 
 			std::string tokenName, equalSign, value;
-			ss >> tokenName >> equalSign >> value;
+			ss >> tokenName >> equalSign;
+			std::ws(ss);	// skip whitespace after =
+			std::getline(ss, value);
 
 			if (equalSign != "=") {
 				ERROR("Linie invalida in fisierul de config:\n"<<line);

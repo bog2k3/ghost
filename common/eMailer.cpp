@@ -13,10 +13,14 @@
 #include <ctime>
 #include <iomanip>
 
-EMailer::EMailer(std::string const& smtpServer, std::string const& smtpUser, std::string const& smtpPassw, std::string const& smtpSenderAddr)
-	: server_(smtpServer), user_(smtpUser), passw_(smtpPassw), senderAddr_(smtpSenderAddr) {
+EMailer::EMailer(std::string const& smtpServer, std::string const& smtpUser, std::string const& smtpPassw, std::string const& smtpSenderAddr,
+		std::string const& senderScreenName, std::string const& footer)
+	: server_(smtpServer), user_(smtpUser), passw_(smtpPassw), senderAddr_(smtpSenderAddr),
+	  senderName_(senderScreenName), footer_(footer) {
 	strLower(server_);
 	strLower(senderAddr_);
+	if (senderName_.empty())
+		senderName_ = smtpUser;
 }
 
 struct upload_context {
@@ -33,6 +37,7 @@ size_t EMailer::payload_source(void *ptr, size_t size, size_t nmemb, void *userp
 
 	if (!std::getline(upload_ctx->stream, data))
 		return 0;
+	data.append("\r\n");	// trebuie pus inapoi, pt ca std::getline consuma CR\LF-u
 
 	size_t len = data.length();
 	memcpy(ptr, data.c_str(), len);
@@ -57,7 +62,7 @@ std::string EMailer::formatCrtDateTime() {
 		<< std::setw(2) << std::setfill('0') << now->tm_hour << ":"
 		<< std::setw(2) << std::setfill('0') << now->tm_min << ":"
 		<< std::setw(2) << std::setfill('0') << now->tm_sec << " "
-		<< "+" << now->tm_gmtoff;
+		<< (now->tm_gmtoff > 0 ? "+" : "-") << std::setw(2) << std::setfill('0') << abs(now->tm_gmtoff)/3600 << "00";
 	return s.str();
 }
 
@@ -83,10 +88,14 @@ void EMailer::buildMsgBody(std::stringstream &ostream, std::vector<std::string> 
 			ostream << "<" << destAddr[i] << ">";
 		}
 		ostream << "\r\n";
-	ostream << "From: " << user_ << "<" << senderAddr_ << ">" << "\r\n";
+	ostream << "From: " << senderName_ << " <" << senderAddr_ << ">" << "\r\n";
+//	ostream << "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@rfcpedant.example.org>\r\n";
 	ostream << "Subject: " << subject << "\r\n";
 	ostream << "\r\n"; // empty line to divide headers from body, see RFC5322
 	ostream << body;
+	if (!footer_.empty())
+		ostream << "\r\n\r\n--------\r\n" << footer_ << "\r\n";
+
 	ostream << "\r\n.\r\n";
 }
 
