@@ -6,9 +6,10 @@
  *  data : 06-octombrie-2015 : Dan : adaugare sortare 
  */
 
-#include "SQLSock.h"
+#include "../common/SQLSock.h"
+#include "../common/log.h"
+#include "../common/dbLabels.h"
 #include "cupidData.h"
-#include "../cpplib/log.h"
 #include <stdio.h>
 #include <string>
 
@@ -56,19 +57,19 @@ void faQueryul(SQLSock &socket, std::string tabel) {
 
 	// am adaugat ordonare, acum meciurile ce au acelasi hash comun vin unele dupa celelalte
 
-	auto res = socket.doQuery("select * from " + tabel+ " order by hash_joc_comun");
+	auto res = socket.doQuery("SELECT * FROM " + tabel + " WHERE " + dbLabels.statusTraduceri + "==0 ORDER BY "+dbLabels.hashComun);
 
 	while (res->next()) {
 		cupidGameData data;
-		data.internalGameId = res->getString(14);
-		data.gameId = res->getString(11);
-		data.cote[pariu::P1] = res->getDouble(4);
-		data.cote[pariu::P1X] = res->getDouble(7);
-		data.cote[pariu::P2] = res->getDouble(5);
-		data.cote[pariu::PX2] = res->getDouble(8);
-		data.cote[pariu::P12] = res->getDouble(9);
-		data.cote[pariu::PX] = res->getDouble(6);
-		data.siteId = res->getString(10);
+		data.internalGameId = res->getString(dbLabels.hashComun);
+		data.gameId = res->getString(dbLabels.gameId);
+		data.cote[pariu::P1] = res->getDouble(dbLabels.cota1);
+		data.cote[pariu::P1X] = res->getDouble(dbLabels.cota1x);
+		data.cote[pariu::P2] = res->getDouble(dbLabels.cota2);
+		data.cote[pariu::PX2] = res->getDouble(dbLabels.cota2x);
+		data.cote[pariu::P12] = res->getDouble(dbLabels.cota12);
+		data.cote[pariu::PX] = res->getDouble(dbLabels.cotax);
+		data.siteId = res->getString(dbLabels.siteId);
 
 		gameData.push_back(data);
 	}

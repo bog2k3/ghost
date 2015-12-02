@@ -4,7 +4,7 @@
 #include <spawn.h>
 #include <sys/wait.h>
 
-#include "../cpplib/log.h"
+#include "../common/log.h"
 
 
 static char* target_args[100] { nullptr };
@@ -35,7 +35,7 @@ bool spawn(int &ret) {
 }
 
 int main(int argc, char* argv[]) {
-	LOGGER("watchdog");
+	LOGPREFIX("watchdog");
 
 	if (argc < 2) {
 		ERROR("Need argument (program to spawn)");
