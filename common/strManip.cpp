@@ -39,6 +39,12 @@ void strLower(std::string &in_out) {
 	f.tolower(const_cast<char*>(in_out.c_str()), in_out.c_str() + in_out.length());
 }
 
+void strUpper(std::string &in_out) {
+	std::locale loc("en_US.UTF8");
+	auto &f = std::use_facet<std::ctype<char> >(loc);
+	f.toupper(const_cast<char*>(in_out.c_str()), in_out.c_str() + in_out.length());
+}
+
 void replaceAllSubstr(std::string &str, std::string const& what, std::string const& replacement) {
 	size_t pos = 0;
 	while ((pos = str.find(what, pos)) != str.npos) {

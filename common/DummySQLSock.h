@@ -24,12 +24,17 @@ public:
 	virtual std::unique_ptr<sql::ResultSet> doQuery(std::string const& query) override;
 
 private:
-	int nRecords = 0;
-	int nColoane = 0;
-	std::map<std::string, std::vector<std::string>> coloane;
-	std::map<int, std::string> indexColoane;
+	int nRecords_ = 0;
+	int nColoane_ = 0;
+	std::map<std::string, std::vector<std::string>> coloane_;
+	std::map<unsigned, std::string> indexColoane_;
 
 	void insert(std::vector<std::string> const& val);
+
+	std::unique_ptr<sql::ResultSet> doSelect(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
+	std::unique_ptr<sql::ResultSet> doInsert(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
+	std::unique_ptr<sql::ResultSet> doUpdate(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
+	std::unique_ptr<sql::ResultSet> doDelete(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
 };
 
 #endif /* DUMMYSQLSOCK_H_ */
