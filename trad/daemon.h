@@ -18,7 +18,7 @@ public:
 	// initializeaza demonul.
 	// listePath - path-ul catre directorul cu liste de echipe/jucatori
 	// se citesc toate fisierele din director, indiferent de nume
-	Daemon(std::string const& listePath);
+	Daemon(std::string const& listePath, std::string const& dataPath);
 
 	// traduce o lista de nume.
 	// Cauta in listele cu echipe una care sa fie egala sau aproximativ egala;
@@ -30,6 +30,7 @@ public:
 
 private:
 	std::string pathListe_;
+	std::string dataPath_;
 	simstring::ngram_generator ngramGenerator_;
 
 	struct sportData {
@@ -39,6 +40,7 @@ private:
 
 	std::map<std::string, sportData> sportData_;	// maps sport names to db readers (which take a single sport-specific list file as input) & alternate name mappings
 
+	std::string getCachePath();
 	void loadCache();
 	void reloadCacheFile(std::string const& path);
 	void updateCacheFile(std::string const& listPath, std::string const& cachePath);

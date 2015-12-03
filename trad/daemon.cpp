@@ -17,19 +17,21 @@
 
 //#define ENABLE_COSINE_MATCHING
 
-std::string getDataPath() {
-	return std::string(getenv("HOME")) + "/.trad/";
-}
-std::string getCachePath() {
-	return getDataPath() + "cache/";
-}
+//std::string getDataPath() {
+//	return std::string(getenv("HOME")) + "/.trad/";
+//}
 
-Daemon::Daemon(std::string const& listePath)
+Daemon::Daemon(std::string const& listePath, std::string const& dataPath)
 	: pathListe_(listePath)
+	, dataPath_(dataPath)
 	, ngramGenerator_(2, false)	// 2 sau 3, vedem cu care e mai bine
 {
 	refreshCache();
 	loadCache();
+}
+
+std::string Daemon::getCachePath() {
+	return dataPath_ + "/.trad/cache/";
 }
 
 void Daemon::invalidCharHandler(std::string const& str) {
@@ -133,7 +135,11 @@ void Daemon::updateCacheFile(std::string const& listPath, std::string const& cac
 					<< "\nCache-ul nu va fi updatat !!!");
 			return;
 		}
-	simstring::writer_base<std::string> dbw(ngramGenerator_, cachePath);
+	simstring::writer_base<std::string> dbw(ngramGenerator_);
+	if (!dbw.open(cachePath)) {
+		ERROR("Nu s-a putut accesa cache-ul la :" << cachePath);
+		return;
+	}
 
 	std::ifstream flist(listPath);
 	if (!flist.is_open()) {
@@ -159,12 +165,11 @@ void Daemon::updateCacheFile(std::string const& listPath, std::string const& cac
 
 void Daemon::refreshCache() {
 	// verificam daca exista directorul de cache:
-	if (!pathExists(getDataPath()))
-		if (!mkDir(getDataPath()))
-			return;
 	if (!pathExists(getCachePath()))
-		if (!mkDir(getCachePath()))
+		if (!mkDirRecursive(getCachePath())) {
+			ERROR("Nu s-a putut crea directorul de cache: " << getCachePath());
 			return;
+		}
 	std::vector<std::string> listFiles = getFiles(pathListe_);
 	for (auto f : listFiles) {
 		if (isDir(f))

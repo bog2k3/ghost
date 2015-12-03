@@ -5,7 +5,7 @@
  *      Author: bog
  */
 
-#define DUMMY_SQL_SOCKET
+//#define DUMMY_SQL_SOCKET
 
 #include "listFile.h"
 
@@ -188,12 +188,17 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 			dbLabels.data +
 			" FROM " + tabel +
 			" WHERE " + dbLabels.statusTraduceri + " != 0"+
-			" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");
+			" ORDER BY " + dbLabels.statusTraduceri + " ASC");
+
+	if (!res || !res->rowsCount()) {
+		LOGLN("Nu exista meciuri netraduse!! Maimutza trage un pui de somnic....");
+		return;
+	}
 
 	std::vector<std::pair<std::string, std::string>> dubioase;
 	std::vector<meciInfo> postponed;
 
-	for (int pas=0; pas < 2; pas++) {
+	for (int pas=1; pas <= 2; pas++) {
 
 		std::vector<meciInfo> crtList;
 		// la pas==1 cerem meciurile din db netraduse
@@ -223,7 +228,12 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				" FROM " + tabel +
 				" WHERE " + dbLabels.data + " = \""+crt.data+"\" "+
 				" AND " + dbLabels.statusTraduceri + " != 3"+
-				" ORDER BY " + dbLabels.statusTraduceri + " ASCENDING");	// vrem echipele traduse (status=0) la inceput daca e posibil
+				" ORDER BY " + dbLabels.statusTraduceri + " ASC");	// vrem echipele traduse (status=0) la inceput daca e posibil
+
+			if (!res2 && pas == 1) {
+				postponed.push_back(crt);
+				continue;
+			}
 
 			/* !!! algoritmu descris aici e mai vechi, nu e chiar exact implementat, dar cat de cat:
 			 *
@@ -318,7 +328,6 @@ int main(int argc, char* argv[]) {
 		break;
 	}
 
-	delete pSock;
 	delete pEmailer;
 
 	return 0;

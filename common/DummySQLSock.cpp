@@ -6,6 +6,7 @@
  */
 
 #include "DummySQLSock.h"
+#include "DummySQLResult.h"
 #include "../common/strManip.h"
 #include "../common/log.h"
 #include <fstream>
@@ -139,7 +140,7 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doSelect(std::vector<std::string> 
 	if (crtTok < tokens.size()) {
 		// we have extra stuff like WHERE or ORDER
 	}
-	std::unique_ptr<sql::ResultSet> pRes(new sql::ResultSet());
+//	std::unique_ptr<DummyResultSet> pRes(new DummyResultSet());
 	for (int i=0; i<nRecords_; i++) {
 		bool recordValid = true;// = where.pass(i);
 		if (recordValid) {
