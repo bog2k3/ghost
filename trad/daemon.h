@@ -44,7 +44,6 @@ private:
 	void loadCache();
 	void reloadCacheFile(std::string const& path);
 	void updateCacheFile(std::string const& listPath, std::string const& cachePath);
-	void invalidCharHandler(std::string const& str);
 };
 
 

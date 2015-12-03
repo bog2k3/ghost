@@ -34,11 +34,6 @@ std::string Daemon::getCachePath() {
 	return dataPath_ + "/.trad/cache/";
 }
 
-void Daemon::invalidCharHandler(std::string const& str) {
-	// append to a file then send it via e-mail
-	// TODO
-}
-
 std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, std::string const& sport) {
 	std::vector<std::string> ret;
 
@@ -50,10 +45,12 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, s
 
 	auto nume = numeIn;
 	std::vector<sanitizeResult> sanRes = sanitize(nume);
+	std::vector<std::string> failed;
 
 	for (unsigned i=0; i<nume.size(); i++) {
 		std::string crt = nume[i];
 		if (sanRes[i].failedDiacritics) {
+			failed.push_back(nume[i]);
 			ret.push_back("NECUNOSCUT");
 			continue;
 		}
@@ -91,6 +88,9 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, s
 			ret.push_back("NECUNOSCUT");
 	}
 	assert(ret.size() == nume.size());
+
+	// TODO pus tot ce e in failed intr-un fisier si o data pe zi trimit mail cu el - trebuie adaugate diacritice
+
 	return ret;
 }
 
