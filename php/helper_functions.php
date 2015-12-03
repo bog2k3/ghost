@@ -3,25 +3,22 @@
  /*
             Creat: DAN
             Data : 10-octombrie-2015
+            Data : 3-decembrie-2015 : Se foloseste traducatorul nu baza de date.
   */
 
-    function    getInternalTeam($connection,$team,$site) {
-                
-        $query = 'select echipa_internal from fotbal_dict where'.
-                 'site = \''.$site.'\' and echipa = \''.$team.'\'';
-        
-        $result = mysqli_query($connection,$query);
-        
-        $RETURN_VALUE;
+    function    getInternalTeam($connection,$team) {
 
-        if (mysqli_num_rows($result) > 0) {
-            
-             if (($row = mysqli_fetch_assoc($result))) {
-                 
-                 $RETURN_VALUE =  $row["echipa_internal"];
-             }
-        }        
-        mysqli_free_result($query);
+        include 'database_setup.php';
+        
+        
+        $TRAD_COMMAND = $trad_path." --cpath ".$trad_cache." --sport fotbal --lpath ".$trad_liste." \"".$team."\"";//." 2>&1";
+        
+        $RETURN_VALUE = shell_exec($TRAD_COMMAND);
+        
+        if (is_null($RETURN_VALUE)) {
+            $RETURN_VALUE="ERROR";
+        }
+        
         return $RETURN_VALUE;
     }
     
