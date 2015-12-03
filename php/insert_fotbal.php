@@ -5,6 +5,7 @@
             Data : 1-octombrie-2015
             Data : 6-octombrie-2015 : Verificare existenta hash pentru insert/update
             Data : 10-octombrie-2015 : mutat functia de verificare existenta traducere
+            Data : 3-decembrie-2015 : modificare structura tabel 
     */
 
     include 'database_setup.php';
@@ -14,7 +15,6 @@
             structura tabel
     ***********************************************
 
-            sesiune 		- uint (10)
             echipa1 		- varchar(32)
             echipa2 		- varchar(32)
             cota_1			- float
@@ -23,13 +23,10 @@
             cota_1x			- float
             cota_2x			- float
             cota_12			- float
-            site_id_1		- varchar(12)
-            game_id_1		- varchar(12)
-            timp 			- timestamp (current)
-            hash_joc		- varchar(64) (PK)
+            site_id		- varchar(12)
+            game_id		- varchar(12)
+            hash_joc_unic	- varchar(64) (PK)
             hash_joc_comun          - varchar(64)
-            echipa1_internal        - varchar(32)
-            echipa2_internal        - varchar(32)
             data_joc                - varchar(10)
             status_echipe           - int(1) - valori posibile 0 - echipele exista in DD 1 - echipa1 nu exista 2-echipa2 nu exista 3-niciuna din echipe nu exista
     ************************************************/
@@ -43,11 +40,6 @@
 
     // se extrag parametrii din post
     // folosesc si get si post pentru a testa direct php'ul
-
-    $id_sesiune         =	$_POST["sesiune"];
-    if ($id_sesiune == '') {
-        $id_sesiune     =       $_GET["sesiune"];
-    }
 
     $echipa1            =	$_POST["e1"];
     if ($echipa1 == '') {
@@ -75,9 +67,10 @@
     }
     
     $cota1x		=	$_POST["c1x"];
-    if ($cota1x == '') 
-    $cota1x		=	$_GET["c1x"];
-
+    if ($cota1x == '') {
+        $cota1x		=	$_GET["c1x"];
+    }
+    
     $cota2x		=	$_POST["c2x"];
     if ($cota2x == '') {
         $cota2x		=	$_GET["c2x"];
@@ -103,11 +96,8 @@
         $game_date          =	$_GET["game_date"];
     }
     
-    // TODO : trebuie facut dictionarul de echipe/site
     // TODO : tabela de erori
-
-   
-
+    
     $con = mysqli_connect($servername,$username,$password,$database,$database_port);
 
     if (!$con) {
@@ -116,19 +106,24 @@
     
     $status_echipe=0;
     
+    $nec = "NECUNOSCUT";
+    $err = "ERROR";
+    
     // se extrag echipele traduse din baza de date
-    $echipa1_internal = getInternalTeam($con,$echipa1,$site); 
-    if ($echipa1_internal == ''){
-        $echipa1_internal=$echipa1;
+    $echipa1_internal = getInternalTeam($con,$echipa1); 
+       
+    if (strcmp(preg_replace('/\s+/','',$echipa1_internal),$nec)==0 || strcmp(preg_replace('/\s+/','',$echipa1_internal),$err)==0) {
         $status_echipe+=1;
+	$echipa1_internal = $echipa1;
     }
     
-    $echipa2_internal = getInternalTeam($con,$echipa2,$site); 
-    if ($echipa2_internal == ''){
-        $echipa2_internal=$echipa2;
+    $echipa2_internal = getInternalTeam($con,$echipa2); 
+    
+    if (strcmp(preg_replace('/\s+/','',$echipa2_internal),$nec)==0 || strcmp(preg_replace('/\s+/','',$echipa2_internal),$err)==0){
         $status_echipe+=2;
+	$echipa2_internal = $echipa2;
     }
-    
+        
     // hash cheie primara gid1.gid2.site.gdate
     $hash_game_pk=hash('sha256',$echipa1_internal.$echipa2_internal.$site.$game_date);
 
@@ -136,7 +131,7 @@
     $hash_game_comun=hash('sha256',$echipa1_internal.$echipa2_internal.$site);
 
     //verifica PK
-    $query = 'select hash_joc from fotbal where hash_joc=\''.$hash_game_pk.'\'';
+    $query = 'select hash_joc_unic from fotbal where hash_joc_unic=\''.$hash_game_pk.'\'';
     $result = mysqli_query($con,$query);
 
 
@@ -144,24 +139,24 @@
 
         // se creaza updateul
         $query = 'update fotbal set '.
-                'sesiune = '.$id_sesiune.','.
                 'cota_1 = '.$cota1.','.
                 'cota_2 = '.$cota2.','.
                 'cota_x = '.$cotax.','.
                 'cota_1x = '.$cota1x.','.
                 'cota_2x = '.$cota2x.','.
                 'cota_12 = '.$cota12.','.
-                'game_id_1 = '.'\''.$game.'\''.
-                ' where hash_joc='.'\''.$hash_game_pk.'\'';
+                'game_id_1 = '.'\''.$game.'\','.
+                'status_echipe = '.$status_echipe.
+                ' where hash_joc_unic='.'\''.$hash_game_pk.'\'';
 
     } else {
 
         // se creaza insertup
 
-        $query = 'insert into fotbal(sesiune,echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id_1,game_id_1,hash_joc,hash_joc_comun,echipa1_internal,echipa2_internal,data_joc,status_echipe) values ('.
-                $id_sesiune.','.
-                '\''.$echipa1.'\''.','.
-                '\''.$echipa2.'\''.','.
+        $query = 'insert into fotbal(echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id,game_id,hash_joc_unic,hash_joc_comun,data_joc,status_echipe) values'. 
+                '('.
+                '\''.$echipa1_internal.'\''.','.
+                '\''.$echipa2_internal.'\''.','.
                 $cota1.','.
                 $cota2.','.
                 $cotax.','.
@@ -172,8 +167,6 @@
                 '\''.$game.'\''.','.
                 '\''.$hash_game_pk.'\','.
                 '\''.$hash_game_comun.'\','.
-                '\''.$echipa1_internal.'\','.
-                '\''.$echipa2_internal.'\','.
                 '\''.$game_date.'\','.
                 $status_echipe.
                 ')';

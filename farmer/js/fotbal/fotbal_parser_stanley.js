@@ -82,9 +82,13 @@ var getStanley_Fotbal = function  () {
                         
                         if (enable_debug==true)
                             console.debug(meci_fotbal_rec.to_text());
-                        //console.debug(meci_fotbal_rec.upload_to_db());
-                        meci_fotbal_rec.upload_to_db();
-
+                        
+                        if (enable_debug==true){
+                            console.debug(meci_fotbal_rec.upload_to_db());
+                        } else {
+                            meci_fotbal_rec.upload_to_db();
+                        }
+                        
                         break;
                         //se iese din loop
                     }
