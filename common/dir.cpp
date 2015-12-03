@@ -6,6 +6,7 @@
  */
 
 #include "log.h"
+#include "strManip.h"
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -40,6 +41,18 @@ bool mkDir(std::string const& path) {
 	return true;
 }
 
+bool mkDirRecursive(std::string const& path) {
+	std::vector<std::string> dirs = strSplit(path, '/');
+	std::string builtPath = "";
+	for (auto d : dirs) {
+		builtPath += "/" + d;
+		if (!pathExists(builtPath))
+			if (!mkDir(builtPath))
+				return false;
+	}
+	return true;
+}
+
 std::string getFileName(std::string const& path) {
 	if (path.find('/') != path.npos)
 		return path.c_str() + path.find_last_of('/') + 1;
@@ -48,11 +61,19 @@ std::string getFileName(std::string const& path) {
 }
 
 std::string stripExt(std::string const& path) {
-	return path.substr(0, path.find_last_of('.'));
+	auto ppos = path.find_last_of('.');
+	if (ppos != path.npos)
+		return path.substr(0, ppos);
+	else
+		return path;
 }
 
 std::string getFileExt(std::string const& path) {
-	return path.substr(path.find_last_of('.'));
+	auto ppos = path.find_last_of('.');
+	if (ppos != path.npos)
+		return path.substr(ppos);
+	else
+		return "";
 }
 
 unsigned long getFileTimestamp(std::string const& path) {

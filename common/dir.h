@@ -16,6 +16,7 @@ std::vector<std::string> getFiles(std::string const& baseDir);
 bool isDir(std::string const& dir);
 bool pathExists(std::string const& path);
 bool mkDir(std::string const& path);
+bool mkDirRecursive(std::string const& path);
 std::string getFileName(std::string const& path);
 std::string stripExt(std::string const& path);
 std::string getFileExt(std::string const& path);
