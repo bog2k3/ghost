@@ -13,12 +13,14 @@
 #include <vector>
 #include <memory>
 
+class EMailer;
+
 class Daemon {
 public:
 	// initializeaza demonul.
 	// listePath - path-ul catre directorul cu liste de echipe/jucatori
 	// se citesc toate fisierele din director, indiferent de nume
-	Daemon(std::string const& listePath, std::string const& dataPath);
+	Daemon(std::string const& configPath, std::string const& listePath, std::string const& dataPath);
 
 	// traduce o lista de nume.
 	// Cauta in listele cu echipe una care sa fie egala sau aproximativ egala;
@@ -32,6 +34,8 @@ private:
 	std::string pathListe_;
 	std::string dataPath_;
 	simstring::ngram_generator ngramGenerator_;
+	EMailer *pEmailer = nullptr;
+	std::vector<std::string> emailDest;
 
 	struct sportData {
 		std::shared_ptr<simstring::reader> dbReader;
@@ -44,6 +48,7 @@ private:
 	void loadCache();
 	void reloadCacheFile(std::string const& path);
 	void updateCacheFile(std::string const& listPath, std::string const& cachePath);
+	void reportFailed(std::vector<std::string> const& failed);
 };
 
 

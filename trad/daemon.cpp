@@ -11,27 +11,89 @@
 #include "../common/dir.h"
 #include "../common/log.h"
 #include "../common/assert.h"
+#include "../common/configFile.h"
+#include "../common/eMailer.h"
 
 #include <fstream>
 #include <algorithm>
 
 //#define ENABLE_COSINE_MATCHING
 
-//std::string getDataPath() {
-//	return std::string(getenv("HOME")) + "/.trad/";
-//}
+struct {
+	const char* muser = "mail-user";
+	const char* mpassw = "mail-passw";
+	const char* mserver = "mail-server";
+	const char* maddr = "mail-addr";
+	const char* mfrom = "mail-from";
+	const char* mdest = "mail-dest";
+	const char* msign = "mail-signature";
+} Cfg;
 
-Daemon::Daemon(std::string const& listePath, std::string const& dataPath)
+Daemon::Daemon(std::string const& configPath, std::string const& listePath, std::string const& dataPath)
 	: pathListe_(listePath)
-	, dataPath_(dataPath)
+	, dataPath_(dataPath + "/.trad")
 	, ngramGenerator_(2, false)	// 2 sau 3, vedem cu care e mai bine
 {
 	refreshCache();
 	loadCache();
+
+	std::map<std::string, std::string> cfgOpt;
+	if (!parseConfigFile(configPath, cfgOpt, {Cfg.muser, Cfg.mpassw, Cfg.mserver, Cfg.maddr, Cfg.mdest})) {
+		ERROR("Trad Daemon nu poate trimite email!!!");
+		return;
+	}
+	pEmailer = new EMailer(cfgOpt[Cfg.mserver], cfgOpt[Cfg.muser], cfgOpt[Cfg.mpassw], cfgOpt[Cfg.maddr], cfgOpt[Cfg.mfrom], cfgOpt[Cfg.msign]);
+	emailDest = strSplit(cfgOpt[Cfg.mdest], ',');
 }
 
 std::string Daemon::getCachePath() {
-	return dataPath_ + "/.trad/cache/";
+	return dataPath_ + "/cache/";
+}
+
+void Daemon::reportFailed(std::vector<std::string> const& failed) {
+	std::string failedFilePath = dataPath_ + "/failed";
+	std::string failedTSPath = dataPath_ + "/failed.last";
+
+	if (!pathExists(failedTSPath)) {
+		if (!touchFile(failedTSPath))
+			ERROR("Nu am putut crea/updata [touch] fisierul " << failedTSPath);
+	}
+
+	std::ofstream ffile(failedFilePath, std::ios::app);
+	if (!ffile.is_open()) {
+		ERROR("Nu am putut deschide [append] fisierul cu echipe failate: " << failedFilePath);
+		return;
+	}
+	for (auto s : failed)
+		ffile << s << "\n";
+	ffile.close();
+
+	if (getFileTimestamp(failedTSPath) + 3600*24 <= getFileTimestamp(failedFilePath)) {
+		if (!pEmailer) {
+			ERROR("Email nu e configurat, nu pot sa trimit lista cu failate!!!");
+			return;
+		}
+		// au trecut cel putin 24h de la ultima notificare pe mail
+		std::ifstream fFailed(failedFilePath);
+		if (!fFailed.is_open()) {
+			ERROR("Nu am putut deschide [read] fisierul cu echipe failate: " << failedFilePath);
+			return;
+		}
+
+		if (!touchFile(failedTSPath)) {
+			ERROR("Nu am putut updata [touch] fisierul " << failedTSPath);
+		}
+		std::stringstream ss;
+		ss << "Cuvinte cu diacritice necunoscute:\r\n";
+		std::string line;
+		while (std::getline(fFailed, line)) {
+			ss << line << "\r\n";
+		}
+		fFailed.close();
+
+		pEmailer->send(emailDest, "traduceri FAILATE", ss.str());
+		deleteFile(failedFilePath);
+	}
 }
 
 std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, std::string const& sport) {
@@ -89,7 +151,8 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, s
 	}
 	assert(ret.size() == nume.size());
 
-	// TODO pus tot ce e in failed intr-un fisier si o data pe zi trimit mail cu el - trebuie adaugate diacritice
+	// punem tot ce e in failed intr-un fisier si o data pe zi trimit mail cu el - trebuie adaugate diacritice
+	reportFailed(failed);
 
 	return ret;
 }
