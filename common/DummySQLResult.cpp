@@ -8,6 +8,8 @@
 #include "DummySQLResult.h"
 #include "strManip.h"
 
+#include <sstream>
+
 void DummyResultSet::afterLast() {
 	current_ = nRecords_;
 }
@@ -64,19 +66,31 @@ size_t DummyResultSet::rowsCount() const {
 uint32_t DummyResultSet::findColumn(const sql::SQLString& columnLabel) const {
 	std::string upper = columnLabel;
 	strUpper(upper);
-	for (int i=0; i<ordinea_.size(); i++)
+	for (uint i=0; i<ordinea_.size(); i++)
 		if (upper == ordinea_[i])
 			return i;
-	return 0xffffffff;
+	return NOCOLUMN;
 }
 
 template<>
-bool DummyResultSet::strToVal<bool, false>(std::string const& str) const {
-	return str == "TRUE";
+bool DummyResultSet::strToVal<bool>(std::string const& str, bool const& valDefault) const {
+	std::string su = str;
+	strUpper(su);
+	return su == "TRUE";
 }
 
-template<typename T, T valDefault>
-T DummyResultSet::getValue(uint32_t columnIndex) const {
+template<typename T>
+T DummyResultSet::strToVal(std::string const& str, T const& valDefault) const {
+	std::stringstream ss(str);
+	T value;
+	ss >> value;
+	if (ss.fail())
+		return valDefault;
+	return value;
+}
+
+template<typename T>
+T DummyResultSet::getValue(uint32_t columnIndex, T const& valDefault) const {
 	if (columnIndex >= coloane_.size())
 		return valDefault;
 	auto const &col = coloane_.find(ordinea_[columnIndex]);
@@ -84,67 +98,71 @@ T DummyResultSet::getValue(uint32_t columnIndex) const {
 		return valDefault;
 	auto value = col->second[current_];
 	strUpper(value);
-	return strToVal<T, valDefault>(value);
+	return strToVal<T>(value, valDefault);
+}
+
+template<typename T>
+T DummyResultSet::getValue(std::string const& label, T const& valDefault) const {
+	auto idx = findColumn(label);
+	if (idx == NOCOLUMN)
+		return valDefault;
+	return getValue<T>(idx, valDefault);
 }
 
 bool DummyResultSet::getBoolean(uint32_t columnIndex) const {
-	return getValue<bool, false>(columnIndex);
+	return getValue<bool>(columnIndex, false);
 }
 
 bool DummyResultSet::getBoolean(const sql::SQLString& columnLabel) const {
-
+	return getValue<bool>(columnLabel, false);
 }
 
 long double DummyResultSet::getDouble(uint32_t columnIndex) const {
-
+	return getValue<long double>(columnIndex, 0);
 }
 
 long double DummyResultSet::getDouble(const sql::SQLString& columnLabel) const {
-
+	return getValue<long double>(columnLabel, 0);
 }
 
 int32_t DummyResultSet::getInt(uint32_t columnIndex) const {
-
+	return getValue<int32_t>(columnIndex, 0);
 }
 
 int32_t DummyResultSet::getInt(const sql::SQLString& columnLabel) const {
-
+	return getValue<int32_t>(columnLabel, 0);
 }
 
 uint32_t DummyResultSet::getUInt(uint32_t columnIndex) const {
-
+	return getValue<uint32_t>(columnIndex, 0);
 }
 
 uint32_t DummyResultSet::getUInt(const sql::SQLString& columnLabel) const {
-
+	return getValue<uint32_t>(columnLabel, 0);
 }
 
 int64_t DummyResultSet::getInt64(uint32_t columnIndex) const {
-
+	return getValue<int64_t>(columnIndex, 0);
 }
 
 int64_t DummyResultSet::getInt64(const sql::SQLString& columnLabel) const {
-
+	return getValue<int64_t>(columnLabel, 0);
 }
 
 uint64_t DummyResultSet::getUInt64(uint32_t columnIndex) const {
-
+	return getValue<uint64_t>(columnIndex, 0);
 }
 
 uint64_t DummyResultSet::getUInt64(const sql::SQLString& columnLabel) const {
-
-}
-
-size_t DummyResultSet::getRow() const {
-
+	return getValue<uint64_t>(columnLabel, 0);
 }
 
 sql::SQLString DummyResultSet::getString(uint32_t columnIndex)  const {
-
+	return getValue<std::string>(columnIndex, "");
 }
 
 sql::SQLString DummyResultSet::getString(const sql::SQLString& columnLabel) const {
-
+	return getValue<std::string>(columnLabel, "");
 }
 
 DummyResultSet::DummyResultSet(std::map<std::string, std::vector<std::string>> coloane,
