@@ -98,7 +98,9 @@ bool processNetrad(std::string const& a1, std::string const& a2,
 		dubioase.push_back(std::make_pair(s1r, s2r));
 	}
 	lf.addNewAlias(a1, b1);
+	LOGLN(b1 << "  ->  " << a1);
 	lf.addNewAlias(a2, b2);
+	LOGLN(b2 << "  ->  " << a2);
 	return true;
 }
 
@@ -136,6 +138,7 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 				StrComp comp(*pNetrad, *pEchiv);
 				auto cstat = comp.getStats();
 				lf.addNewAlias(*pEchiv, *pNetrad);
+				LOGLN(*pNetrad << "  ->  " << *pEchiv);
 				if (!acceptCondition(cstat)) {
 					// e dubios, nu prea se potriveste, dam warning pe mail
 					dubioase.push_back(std::make_pair(*pEchiv, *pNetrad));
@@ -153,9 +156,11 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 				StrComp scomp(*pR2Netrad, *pNetrad);
 				auto cstat = scomp.getStats();
 				lf.addNewAlias(*pNetrad, *pR2Netrad);
+				LOGLN(*pR2Netrad << "  ->  " << *pNetrad);
 				if (!acceptCondition(cstat)) {
 					// e dubios, nu prea se potriveste, dam warning pe mail
 					dubioase.push_back(std::make_pair(*pNetrad, *pR2Netrad));
+					LOGLN("DUBIOS:  " << *pNetrad << "   ~   " << *pR2Netrad);
 				}
 				return true;
 			} else {
@@ -179,8 +184,32 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		return;
 	}
 
-	// 2. cerem meciurile netraduse:
+	// 1.5. facem un sanity test pe baza de date:
 	auto res = sock.doQuery(
+			"SELECT "+
+			dbLabels.echipa1+","+
+			dbLabels.echipa2+","+
+			dbLabels.statusTraduceri+","+
+			dbLabels.data +
+			" FROM " + tabel +
+			" WHERE " + dbLabels.echipa1 + "=" + dbLabels.echipa2);
+	if (res && res->rowsCount()) {
+		ERROR("Apar meciuri in DB cu aceeasi echipa vs ea insasi!!!");
+		if (pEmailer) {
+			std::stringstream ss;
+			ss << "Am gasit meciuri invalide in DB:\r\n\r\n";
+			while (res->next()) {
+				ss << res->getString(dbLabels.echipa1) << "  vs  ";
+				ss << res->getString(dbLabels.echipa2) << "  ";
+				ss << "[status: " << res->getString(dbLabels.statusTraduceri) <<"]  ";
+				ss << res->getString(dbLabels.data) << "\r\n";
+			}
+			pEmailer->send(emailRecipients, "Meciuri invalide in DB!", ss.str());
+		}
+	}
+
+	// 2. cerem meciurile netraduse:
+	res = sock.doQuery(
 			"SELECT "+
 			dbLabels.echipa1+","+
 			dbLabels.echipa2+","+
@@ -262,7 +291,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				meciInfo r2;
 				r2.echipa1 = res2->getString(dbLabels.echipa1);
 				r2.echipa2 = res2->getString(dbLabels.echipa2);
-				r2.data = res2->getString(dbLabels.data);
+				r2.data = crt.data;
 				r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
 
 				process(crt, r2, lf, dubioase, pas == 1 ? &postponed : nullptr);
