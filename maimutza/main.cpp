@@ -5,7 +5,7 @@
  *      Author: bog
  */
 
-//#define DUMMY_SQL_SOCKET
+#define DUMMY_SQL_SOCKET
 
 #include "listFile.h"
 

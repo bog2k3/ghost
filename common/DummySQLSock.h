@@ -10,8 +10,8 @@
 
 #include "ISQLSock.h"
 #include <vector>
-#include <map>
 #include <string>
+#include <map>
 
 class DummySQLSock: public ISQLSock {
 public:
@@ -26,8 +26,9 @@ public:
 private:
 	int nRecords_ = 0;
 	int nColoane_ = 0;
-	std::map<std::string, std::vector<std::string>> coloane_;
-	std::map<unsigned, std::string> indexColoane_;
+	std::vector<std::vector<std::string>> coloane_;
+	std::vector<std::string> numeColoane_;
+	std::map<std::string, int> nume2Index_;
 
 	void insert(std::vector<std::string> const& val);
 

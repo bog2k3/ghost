@@ -66,8 +66,8 @@ size_t DummyResultSet::rowsCount() const {
 uint32_t DummyResultSet::findColumn(const sql::SQLString& columnLabel) const {
 	std::string upper = columnLabel;
 	strUpper(upper);
-	for (uint i=0; i<ordinea_.size(); i++)
-		if (upper == ordinea_[i])
+	for (uint i=0; i<numeColoane_.size(); i++)
+		if (upper == numeColoane_[i])
 			return i;
 	return NOCOLUMN;
 }
@@ -93,10 +93,7 @@ template<typename T>
 T DummyResultSet::getValue(uint32_t columnIndex, T const& valDefault) const {
 	if (columnIndex >= coloane_.size())
 		return valDefault;
-	auto const &col = coloane_.find(ordinea_[columnIndex]);
-	if (col == coloane_.end())
-		return valDefault;
-	auto value = col->second[current_];
+	auto value = coloane_[columnIndex][current_];
 	strUpper(value);
 	return strToVal<T>(value, valDefault);
 }
@@ -165,17 +162,15 @@ sql::SQLString DummyResultSet::getString(const sql::SQLString& columnLabel) cons
 	return getValue<std::string>(columnLabel, "");
 }
 
-DummyResultSet::DummyResultSet(std::map<std::string, std::vector<std::string>> coloane,
-			std::vector<std::string> ordinea)
+DummyResultSet::DummyResultSet(std::vector<std::vector<std::string>> const& coloane,
+		std::vector<std::string> const& numeColoane)
 : coloane_(coloane)
-, ordinea_(ordinea)
+, numeColoane_(numeColoane)
 {
-	auto it = coloane_.begin();
-	nRecords_ = it->second.size();
-	while (it != coloane_.end()) {
-		assertDbg(it->second.size() == nRecords_ && "Toate coloanele trebuie sa aiba acelasi numar de inregistrari!");
-		it++;
+	nRecords_ = coloane[0].size();
+	for (uint i=1; i<coloane.size(); i++) {
+		assertDbg(coloane[i].size() == nRecords_ && "Toate coloanele trebuie sa aiba acelasi numar de inregistrari!");
 	}
-	for (auto &c : ordinea_)
+	for (auto &c : numeColoane_)
 		strUpper(c);
 }

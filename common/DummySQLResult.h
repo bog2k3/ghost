@@ -22,8 +22,8 @@ class DummyResultSet : public sql::ResultSet
 {
 public:
 
-	DummyResultSet(std::map<std::string, std::vector<std::string>> coloane,
-			std::vector<std::string> ordinea);
+	DummyResultSet(std::vector<std::vector<std::string>> const& coloane,
+			std::vector<std::string> const& numeColoane);
 
 	virtual ~DummyResultSet() override {}
 
@@ -129,13 +129,13 @@ public:
 	virtual bool wasNull() const override NOTIMPLEMENTED
 
 private:
-	int nRecords_;
-	int current_;
+	int nRecords_ = 0;
+	int current_ = -1;
 
 	static constexpr unsigned long NOCOLUMN = 0xffffffff;
 
-	std::map<std::string, std::vector<std::string>> coloane_;
-	std::vector<std::string> ordinea_;
+	std::vector<std::vector<std::string>> coloane_;
+	std::vector<std::string> numeColoane_;
 
 	template<typename T>
 	T strToVal(std::string const& str, T const& valDefault) const;
