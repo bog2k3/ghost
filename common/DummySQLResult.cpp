@@ -94,9 +94,9 @@ T DummyResultSet::strToVal(std::string const& str, T const& valDefault) const {
 
 template<typename T>
 T DummyResultSet::getValue(uint32_t columnIndex, T const& valDefault) const {
-	if (columnIndex >= coloane_.size())
+	if (columnIndex >= numeColoane_.size())
 		return valDefault;
-	auto value = coloane_[columnIndex][current_];
+	auto value = rows_[current_][columnIndex];
 	return strToVal<T>(value, valDefault);
 }
 
@@ -164,15 +164,12 @@ sql::SQLString DummyResultSet::getString(const sql::SQLString& columnLabel) cons
 	return getValue<std::string>(columnLabel, "");
 }
 
-DummyResultSet::DummyResultSet(std::vector<std::vector<std::string>> const& coloane,
+DummyResultSet::DummyResultSet(std::vector<std::vector<std::string>> const& rows,
 		std::vector<std::string> const& numeColoane)
-: coloane_(coloane)
+: rows_(rows)
 , numeColoane_(numeColoane)
 {
-	nRecords_ = coloane[0].size();
-	for (uint i=1; i<coloane.size(); i++) {
-		assertDbg(coloane[i].size() == nRecords_ && "Toate coloanele trebuie sa aiba acelasi numar de inregistrari!");
-	}
+	nRecords_ = rows_.size();
 	for (auto &c : numeColoane_)
 		c = strUpper(c);
 }

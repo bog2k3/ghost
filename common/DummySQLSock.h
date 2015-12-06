@@ -24,9 +24,8 @@ public:
 	virtual std::unique_ptr<sql::ResultSet> doQuery(std::string const& query) override;
 
 private:
-	int nRecords_ = 0;
 	int nColoane_ = 0;
-	std::vector<std::vector<std::string>> coloane_;
+	std::vector<std::vector<std::string>> records_;
 	std::vector<std::string> numeColoane_;
 	std::map<std::string, int> nume2Index_;
 
@@ -36,6 +35,17 @@ private:
 	std::unique_ptr<sql::ResultSet> doInsert(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
 	std::unique_ptr<sql::ResultSet> doUpdate(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
 	std::unique_ptr<sql::ResultSet> doDelete(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok);
+};
+
+class WhereClause {
+public:
+	bool parse(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned &crtTok);
+	bool validate(std::vector<std::string> const& record, std::map<std::string, int> const& name2Index);
+
+private:
+	bool equalClause_ = true;
+	std::string column_;
+	std::string value_;
 };
 
 #endif /* DUMMYSQLSOCK_H_ */

@@ -26,7 +26,6 @@ DummySQLSock::DummySQLSock(const char* filePath) {
 	for (int i=0; i<nColoane_; i++) {
 		numeColoane_[i] = strUpper(numeColoane_[i]);	// column names will be uppercase
 		nume2Index_[numeColoane_[i]] = i;
-		coloane_.push_back(std::vector<std::string>());
 	}
 	std::string l;
 	while (std::getline(f, l)) {
@@ -42,9 +41,10 @@ DummySQLSock::~DummySQLSock() {
 }
 
 void DummySQLSock::insert(std::vector<std::string> const& val) {
+	std::vector<std::string> record;
 	for (int i=0; i<nColoane_; i++)
-		coloane_[i].push_back(i < val.size() ? val[i] : "");
-	nRecords_++;
+		record.push_back(i < val.size() ? val[i] : "");
+	records_.push_back(record);
 }
 
 bool DummySQLSock::connect(std::string const& URI, std::string const& user, std::string const& passw) {
@@ -139,26 +139,48 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doSelect(std::vector<std::string> 
 
 	bool order = false;
 	bool order_descending = false;
-	// WhereClause where;
-	if (crtTok < tokens.size()) {
+	WhereClause where;
+	while (crtTok < tokens.size()) {
 		// we have extra stuff like WHERE or ORDER
+		if (upperTokens[crtTok] == "ORDER") {
+			order = true;
+			if (++crtTok < tokens.size()) {
+				if (upperTokens[crtTok] == "DESC") {
+					order_descending = true;
+					crtTok++;
+				}
+				else if (upperTokens[crtTok] != "ASC") {
+					ERROR("invalid query: unexpected token after ORDER: " << tokens[crtTok]);
+					return nullptr;
+				}
+			}
+		} else if (upperTokens[crtTok] == "WHERE") {
+			crtTok++;
+			if (!where.parse(upperTokens, tokens, crtTok))
+				return nullptr;
+		} else {
+			ERROR("Unexpected token: " << tokens[crtTok]);
+			return nullptr;
+		}
 	}
 	
-	std::vector<int> ordinea;
+	std::vector<int> ordinea;	// ordinea[i] - indexul coloanei reale selectata pe pozitia i
 	std::vector<std::string> numeSelectedCols;
 	std::vector<std::vector<std::string>> selectedValues;
 	for (int i : selectedCols) {
 		ordinea.push_back(i);
 		numeSelectedCols.push_back(numeColoane_[i]);
-		selectedValues.push_back(std::vector<std::string>());
+//		selectedValues.push_back(std::vector<std::string>());
 	}
 
-	for (int i=0; i<nRecords_; i++) {
-		bool recordValid = true;// = where.pass(i);
+	for (int i=0; i<records_.size(); i++) {
+		bool recordValid = where.validate(records_[i], nume2Index_);
 		if (recordValid) {
 			// add this record's values to the output
+			std::vector<std::string> selRecord;
 			for (int k=0; k<selectedCols.size(); k++)
-				selectedValues[k].push_back(coloane_[ordinea[k]][i]);
+				selRecord.push_back(records_[i][ordinea[k]]);
+			selectedValues.push_back(selRecord);
 		}
 	}
 	if (order) {
@@ -201,7 +223,7 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doQuery(std::string const& query) 
 
 	if (q.back() == ';')
 		q.pop_back();
-	std::vector<std::string> tokens = strSplit(q, ' ');
+	std::vector<std::string> tokens = strSplitPreserveQuotes(q, {' '});
 	std::vector<std::string> upperTokens = tokens;
 	for (auto &s : upperTokens)
 		s = strUpper(s);
@@ -223,4 +245,12 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doQuery(std::string const& query) 
 		ERROR("Invalid SQL command: " + tokens[crtTok-1]);
 		return nullptr;
 	}
+}
+
+bool WhereClause::parse(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned &crtTok) {
+
+}
+
+bool WhereClause::validate(std::vector<std::string> const& record, std::map<std::string, int> const& name2Index) {
+
 }

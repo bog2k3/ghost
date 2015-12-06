@@ -22,7 +22,7 @@ class DummyResultSet : public sql::ResultSet
 {
 public:
 
-	DummyResultSet(std::vector<std::vector<std::string>> const& coloane,
+	DummyResultSet(std::vector<std::vector<std::string>> const& rows,
 			std::vector<std::string> const& numeColoane);
 
 	virtual ~DummyResultSet() override {}
@@ -134,7 +134,7 @@ private:
 
 	static constexpr unsigned long NOCOLUMN = 0xffffffff;
 
-	std::vector<std::vector<std::string>> coloane_;
+	std::vector<std::vector<std::string>> rows_;
 	std::vector<std::string> numeColoane_;
 
 	template<typename T>
