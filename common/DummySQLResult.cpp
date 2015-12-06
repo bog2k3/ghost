@@ -64,8 +64,7 @@ size_t DummyResultSet::rowsCount() const {
 }
 
 uint32_t DummyResultSet::findColumn(const sql::SQLString& columnLabel) const {
-	std::string upper = columnLabel;
-	strUpper(upper);
+	std::string upper = strUpper(columnLabel);
 	for (uint i=0; i<numeColoane_.size(); i++)
 		if (upper == numeColoane_[i])
 			return i;
@@ -74,9 +73,13 @@ uint32_t DummyResultSet::findColumn(const sql::SQLString& columnLabel) const {
 
 template<>
 bool DummyResultSet::strToVal<bool>(std::string const& str, bool const& valDefault) const {
-	std::string su = str;
-	strUpper(su);
+	std::string su = strUpper(str);
 	return su == "TRUE";
+}
+
+template<>
+std::string DummyResultSet::strToVal<std::string>(std::string const& str, std::string const& valDefault) const {
+	return str.empty() ? valDefault : str;
 }
 
 template<typename T>
@@ -94,7 +97,6 @@ T DummyResultSet::getValue(uint32_t columnIndex, T const& valDefault) const {
 	if (columnIndex >= coloane_.size())
 		return valDefault;
 	auto value = coloane_[columnIndex][current_];
-	strUpper(value);
 	return strToVal<T>(value, valDefault);
 }
 
@@ -172,5 +174,5 @@ DummyResultSet::DummyResultSet(std::vector<std::vector<std::string>> const& colo
 		assertDbg(coloane[i].size() == nRecords_ && "Toate coloanele trebuie sa aiba acelasi numar de inregistrari!");
 	}
 	for (auto &c : numeColoane_)
-		strUpper(c);
+		c = strUpper(c);
 }

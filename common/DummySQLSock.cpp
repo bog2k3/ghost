@@ -24,7 +24,8 @@ DummySQLSock::DummySQLSock(const char* filePath) {
 	numeColoane_ = strSplit(cnames,';');
 	nColoane_ = numeColoane_.size();
 	for (int i=0; i<nColoane_; i++) {
-		strUpper(numeColoane_[i]);	// column names will be uppercase
+		numeColoane_[i] = strUpper(numeColoane_[i]);	// column names will be uppercase
+		nume2Index_[numeColoane_[i]] = i;
 		coloane_.push_back(std::vector<std::string>());
 	}
 	std::string l;
@@ -43,6 +44,7 @@ DummySQLSock::~DummySQLSock() {
 void DummySQLSock::insert(std::vector<std::string> const& val) {
 	for (int i=0; i<nColoane_; i++)
 		coloane_[i].push_back(i < val.size() ? val[i] : "");
+	nRecords_++;
 }
 
 bool DummySQLSock::connect(std::string const& URI, std::string const& user, std::string const& passw) {
@@ -77,8 +79,7 @@ enum class SQL_SORTDIR {
 };
 
 SQL_CMD getSQLCmd(std::string const& strCmd) {
-	auto upper = strCmd;
-	strUpper(upper);
+	auto upper = strUpper(strCmd);
 	if (upper == "SELECT")
 		return SQL_CMD::SELECT;
 	if (upper == "INSERT")
@@ -117,6 +118,8 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doSelect(std::vector<std::string> 
 		// select columns listed in comma separated format
 		std::vector<std::string> cols = strSplit(upperTokens[crtTok], ',');
 		for (auto c : cols) {
+			if (c.empty())
+				continue;
 			if (nume2Index_.find(c) == nume2Index_.end()) {
 				ERROR("invalid query: unknown column " << c);
 				return nullptr;
@@ -200,8 +203,8 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doQuery(std::string const& query) 
 		q.pop_back();
 	std::vector<std::string> tokens = strSplit(q, ' ');
 	std::vector<std::string> upperTokens = tokens;
-	for (auto s : upperTokens)
-		strUpper(s);
+	for (auto &s : upperTokens)
+		s = strUpper(s);
 	unsigned crtTok = 0;
 	switch (getSQLCmd(tokens[crtTok++])) {
 	case SQL_CMD::SELECT:

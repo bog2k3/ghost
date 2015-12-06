@@ -11,6 +11,6 @@
 unsigned getNumberOfWords(std::string const& str);
 std::vector<std::string> strSplit(std::string const& text, char sep);
 std::vector<std::string> strSplit(std::string const& text, std::vector<char> const& sep);
-void strLower(std::string &in_out);
-void strUpper(std::string &in_out);
+std::string strLower(std::string const& str);
+std::string strUpper(std::string const& str);
 void replaceAllSubstr(std::string &str, std::string const& what, std::string const& replacement);

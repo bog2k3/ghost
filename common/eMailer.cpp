@@ -15,10 +15,9 @@
 
 EMailer::EMailer(std::string const& smtpServer, std::string const& smtpUser, std::string const& smtpPassw, std::string const& smtpSenderAddr,
 		std::string const& senderScreenName, std::string const& footer)
-	: server_(smtpServer), user_(smtpUser), passw_(smtpPassw), senderAddr_(smtpSenderAddr),
+	: server_(strLower(smtpServer)), user_(smtpUser), passw_(smtpPassw),
+	  senderAddr_(strLower(smtpSenderAddr)),
 	  senderName_(senderScreenName), footer_(footer) {
-	strLower(server_);
-	strLower(senderAddr_);
 	if (senderName_.empty())
 		senderName_ = smtpUser;
 }

@@ -42,7 +42,7 @@ sanitizeResult sanitize(std::string &s) {
 
 	// 4. tolower:
 	if (!res.failedDiacritics)
-		strLower(s);
+		s = strLower(s);
 
 	// 5. remove age restrictions:
 	size_t u19pos = 0, u21pos = 0;

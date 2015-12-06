@@ -33,16 +33,20 @@ std::vector<std::string> strSplit(std::string const& text, std::vector<char> con
 	return tokens;
 }
 
-void strLower(std::string &in_out) {
+std::string strLower(std::string const& str) {
 	std::locale loc("en_US.UTF8");
 	auto &f = std::use_facet<std::ctype<char> >(loc);
-	f.tolower(const_cast<char*>(in_out.c_str()), in_out.c_str() + in_out.length());
+	std::string res(str.c_str());
+	f.tolower(const_cast<char*>(res.c_str()), res.c_str() + res.length());
+	return res;
 }
 
-void strUpper(std::string &in_out) {
+std::string strUpper(std::string const& str) {
 	std::locale loc("en_US.UTF8");
 	auto &f = std::use_facet<std::ctype<char> >(loc);
-	f.toupper(const_cast<char*>(in_out.c_str()), in_out.c_str() + in_out.length());
+	std::string res(str.c_str());
+	f.toupper(const_cast<char*>(res.c_str()), res.c_str() + res.length());
+	return res;
 }
 
 void replaceAllSubstr(std::string &str, std::string const& what, std::string const& replacement) {
