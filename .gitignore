@@ -33,6 +33,13 @@
 .settings/
 */.settings/
 RemoteSystemsTempFiles/
-Debug/
-Release/
 eclipse.sh
+*/Debug/trad
+*/Release/trad
+*/Debug/maimutza
+*/Release/maimutza
+*/Debug/cupid
+*/Release/cupid
+*/Debug/watchdog
+*/Release/watchdog
+
