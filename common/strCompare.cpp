@@ -9,14 +9,25 @@
 #include "strManip.h"
 #include "wordFreq.h"
 #include "sanitize.h"
+#include "assert.h"
 #include <algorithm>
 #include <map>
+
+#ifdef DEBUG
+#define assertSanitized(str) {\
+	std::string s1(str.c_str());\
+	sanitize(str);\
+	assertDbg(s1 == str && "Bă, sanitizeaza stringurile inainte sa le pasezi la StrComp!!!");\
+}
+#else
+#define assertSanitized(str)
+#endif
 
 StrComp::StrComp(std::string const& s1, std::string const& s2)
 	: s1_(s1), s2_(s2)
 {
-	sanitize(s1_);
-	sanitize(s2_);
+	assertSanitized(s1_);
+	assertSanitized(s2_);
 	preprocess();
 }
 

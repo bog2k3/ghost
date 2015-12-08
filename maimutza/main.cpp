@@ -22,6 +22,7 @@
 #include "../common/strCompare.h"
 #include "../common/strManip.h"
 #include "../common/eMailer.h"
+#include "../common/sanitize.h"
 
 #include <iostream>
 #include <string>
@@ -67,14 +68,16 @@ double fitness(StrComp::Result const& res) {
 }
 
 bool acceptCondition(StrComp::Result const& res) {
-	constexpr float accept_thresh_idrwr = 0.75f;
+	constexpr float accept_thresh_idrwr = 0.78f;
 	return res.identicalWords >= 1 && fitness(res)  >= accept_thresh_idrwr;
 }
 
-bool processNetrad(std::string const& a1, std::string const& a2,
-					std::string const& b1, std::string const& b2,
+bool processNetrad(std::string& a1, std::string& a2,
+					std::string& b1, std::string& b2,
 					listFile &lf,
 					std::vector<std::pair<std::string, std::string>> &dubioase) {
+	sanitize(a1); sanitize(a2);
+	sanitize(b1); sanitize(b2);
 	StrComp scA(a1, b1);
 	StrComp scB(a2, b2);
 	auto statA = scA.getStats();
@@ -104,7 +107,7 @@ bool processNetrad(std::string const& a1, std::string const& a2,
 	return true;
 }
 
-bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
+bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 		std::vector<std::pair<std::string, std::string>> &dubioase,
 		std::vector<meciInfo> *postponed) {
 	switch (crt.statusTrad) {
@@ -128,13 +131,15 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 	case 2:
 	case 1:
 		// o echipa din crt nu e tradusa
-		const std::string* pTrad = crt.statusTrad == 1 ? &crt.echipa2 : &crt.echipa1;
-		const std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
+		std::string* pTrad = crt.statusTrad == 1 ? &crt.echipa2 : &crt.echipa1;
+		std::string* pNetrad = crt.statusTrad == 1 ? &crt.echipa1 : &crt.echipa2;
 		if (r2.statusTrad == 0) {
 			// ambele echipe din r2 sunt traduse, de vis :-)
-			const std::string *pEchiv = (*pTrad == r2.echipa1) ? &r2.echipa2 : ((*pTrad == r2.echipa2) ? &r2.echipa1 : nullptr);
+			std::string *pEchiv = (*pTrad == r2.echipa1) ? &r2.echipa2 : ((*pTrad == r2.echipa2) ? &r2.echipa1 : nullptr);
 			if (pEchiv) {
 				// inseamna ca pNetrad trebuie sa fie echivalenta cu r2.echipa1 sau r2.echipa2
+				sanitize(*pNetrad);
+				sanitize(*pEchiv);
 				StrComp comp(*pNetrad, *pEchiv);
 				auto cstat = comp.getStats();
 				lf.addNewAlias(*pEchiv, *pNetrad);
@@ -148,11 +153,13 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 				return false; // r2 nu e acelasi meci, chiar daca e in acelasi timp
 		} else {
 			// una dintre ecihpele din r2 nu e tradusa
-			const std::string* pR2Trad = r2.statusTrad == 1 ? &r2.echipa2 : &r2.echipa1;
-			const std::string* pR2Netrad = r2.statusTrad == 1 ? &r2.echipa1 : &r2.echipa2;
+			std::string* pR2Trad = r2.statusTrad == 1 ? &r2.echipa2 : &r2.echipa1;
+			std::string* pR2Netrad = r2.statusTrad == 1 ? &r2.echipa1 : &r2.echipa2;
 			if (*pR2Trad == *pTrad) {
 				// avem o echipa comuna si aceeasi data => si cealalata TREBUIE sa fie aceeasi
 				// adica => *pR2Netrad == *pNetrad
+				sanitize(*pR2Netrad);
+				sanitize(*pNetrad);
 				StrComp scomp(*pR2Netrad, *pNetrad);
 				auto cstat = scomp.getStats();
 				lf.addNewAlias(*pNetrad, *pR2Netrad);
@@ -205,7 +212,9 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				ss << "[status: " << res->getString(dbLabels.statusTraduceri) <<"]  ";
 				ss << res->getString(dbLabels.data) << "\r\n";
 			}
+#ifndef DEBUG
 			pEmailer->send(emailRecipients, "Meciuri invalide in DB!", ss.str());
+#endif
 		}
 	}
 

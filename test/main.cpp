@@ -1,13 +1,14 @@
+#include "../common/strCompare.h"
 #include <iostream>
-#include "../common/DummySQLSock.h"
-#include "../common/strManip.h"
+#include <string>
 
 int main() {
-	DummySQLSock s("../test-maimutza");
+	std::string s1("macclesfield town");
+	std::string s2("erzgebirge aue");
+	std::string s3("macclesfield");
 
-	auto res = s.doQuery("SELECT echipa1,echipa2,data_joc,status_echipe from fotbal");
-	while (res->next()) {
-		std::cout << res->getString("echipa1") << " : " << res->getString("echipa2") << " [" << res->getInt("status_echipe") << "] "
-				<< res->getString("data_joc") << "\n";
-	}
+	auto r1 = StrComp(s1, s2).getStats();
+	auto r2 = StrComp(s1, s3).getStats();
+
+	std::cout << "a";
 }
