@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <fstream>
 
 bool isDir(std::string const& dir) {
     struct stat fileInfo;
@@ -34,6 +35,10 @@ bool pathExists(std::string const& path) {
 }
 
 bool touchFile(std::string const& path) {
+	if (!pathExists(path)) {
+		std::ofstream f(path);
+		return f.is_open();
+	}
 	return !utime(path.c_str(), nullptr);
 }
 
