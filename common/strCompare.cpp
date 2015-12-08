@@ -8,12 +8,15 @@
 #include "strCompare.h"
 #include "strManip.h"
 #include "wordFreq.h"
+#include "sanitize.h"
 #include <algorithm>
 #include <map>
 
 StrComp::StrComp(std::string const& s1, std::string const& s2)
 	: s1_(s1), s2_(s2)
 {
+	sanitize(s1_);
+	sanitize(s2_);
 	preprocess();
 }
 

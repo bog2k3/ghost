@@ -5,7 +5,7 @@
  *      Author: bog
  */
 
-#define DUMMY_SQL_SOCKET
+//#define DUMMY_SQL_SOCKET
 
 #include "listFile.h"
 
@@ -178,7 +178,8 @@ bool process(meciInfo const& crt, meciInfo const& r2, listFile &lf,
 
 void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& listePath) {
 	// 1. incarcam listele:
-	listFile lf = loadListFile(listePath+'/'+tabel);
+	auto listFilePath = listePath+'/'+tabel;
+	listFile lf = loadListFile(listFilePath);
 	if (lf.io_result != listFile::IO_OK) {
 		ERROR("maimuța nu poate deschide listele!!! \"" << listePath+'/'+tabel << "\"");
 		return;
@@ -298,6 +299,9 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 			}
 		} // for crt
 	} // for pas
+
+//	if (saveListFile(listFilePath, lf) != listFile::IO_OK)
+//		ERROR("Nu am putut salva lista in " + listFilePath);
 
 	// dam mail cu echipele dubioase:
 	if (dubioase.size()) {
