@@ -22,8 +22,8 @@ class DummyResultSet : public sql::ResultSet
 {
 public:
 
-	DummyResultSet(std::map<std::string, std::vector<std::string>> coloane,
-			std::vector<std::string> ordinea);
+	DummyResultSet(std::vector<std::vector<std::string>> const& rows,
+			std::vector<std::string> const& numeColoane);
 
 	virtual ~DummyResultSet() override {}
 
@@ -73,7 +73,7 @@ public:
 
 	virtual sql::ResultSetMetaData * getMetaData() const override NOTIMPLEMENTED
 
-	virtual size_t getRow() const override;
+	virtual size_t getRow() const override NOTIMPLEMENTED
 
 	virtual sql::RowID * getRowId(uint32_t columnIndex) override NOTIMPLEMENTED
 	virtual sql::RowID * getRowId(const sql::SQLString & columnLabel) override NOTIMPLEMENTED
@@ -129,17 +129,22 @@ public:
 	virtual bool wasNull() const override NOTIMPLEMENTED
 
 private:
-	int nRecords_;
-	int current_;
+	int nRecords_ = 0;
+	int current_ = -1;
 
-	std::map<std::string, std::vector<std::string>> coloane_;
-	std::vector<std::string> ordinea_;
+	static constexpr unsigned long NOCOLUMN = 0xffffffff;
 
-	template<typename T, T valDefault>
-	T strToVal(std::string const& str) const;
+	std::vector<std::vector<std::string>> rows_;
+	std::vector<std::string> numeColoane_;
 
-	template<typename T, T valDefault>
-	T getValue(uint32_t columnIndex) const;
+	template<typename T>
+	T strToVal(std::string const& str, T const& valDefault) const;
+
+	template<typename T>
+	T getValue(uint32_t columnIndex, T const& valDefault) const;
+
+	template<typename T>
+	T getValue(std::string const& label, T const& valDefault) const;
 };
 
 

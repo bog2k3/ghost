@@ -14,6 +14,7 @@
 
 bool parseCmdLine(int argc, char* argv[],
 		std::string &out_sport,
+		std::string &out_configPath,
 		std::string &out_listePath,
 		std::string &out_cachePath,
 		std::vector<std::string> &out_nume) {
@@ -26,6 +27,13 @@ bool parseCmdLine(int argc, char* argv[],
 			}
 			out_sport = argv[++i];
 			sportParamExist = true;
+		}
+		else if (!strcmp(argv[i], "--config")) {
+			if (i == argc-1) {
+				ERROR("Așteptam un argument după '--config' !!!");
+				return false;
+			}
+			out_configPath = argv[++i];
 		}
 		else if (!strcmp(argv[i], "--lpath")) {
 			if (i == argc-1) {
@@ -52,17 +60,19 @@ bool parseCmdLine(int argc, char* argv[],
 
 int main(int argc, char* argv[]) {
 	std::string sport;
+	std::string configPath;
 	std::string listePath = ".";
 	std::string cachePath = ".";
 	std::vector<std::string> nume;
-	if (!parseCmdLine(argc, argv, sport, listePath, cachePath, nume)) {
+	// TODO inlocuit cu aia standard din cmdLine.h
+	if (!parseCmdLine(argc, argv, sport, configPath, listePath, cachePath, nume) || configPath.empty()) {
 		ERROR("Sintaxa liniei de comanda este proasta!\n" <<
 				"Exemplu bun: \n" <<
-				"trad --sport fotbal [--lpath path] [--cpath path] \"Echipa unu\" \"echipa doi\" ...\n");
+				"trad --config ~/.ghost.config --sport fotbal [--lpath path] [--cpath path] \"Echipa unu\" \"echipa doi\" ...\n");
 		return -1;
 	}
 
-	Daemon daemon(listePath, cachePath);
+	Daemon daemon(configPath, listePath, cachePath);
 
 	auto traduse = daemon.match(nume, sport);
 	for (unsigned i=0; i<traduse.size(); i++)

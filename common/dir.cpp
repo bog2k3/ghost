@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <utime.h>
 
 #include <iostream>
 #include <string>
@@ -30,6 +31,10 @@ bool isDir(std::string const& dir) {
 bool pathExists(std::string const& path) {
 	struct stat fileInfo;
 	return stat(path.c_str(), &fileInfo) == 0;
+}
+
+bool touchFile(std::string const& path) {
+	return !utime(path.c_str(), nullptr);
 }
 
 bool mkDir(std::string const& path) {

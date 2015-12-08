@@ -1,13 +1,14 @@
-#include "../common/eMailer.h"
-#include "../common/configFile.h"
-#include "../common/strManip.h"
+#include "../common/strCompare.h"
+#include <iostream>
+#include <string>
 
 int main() {
-	std::map<std::string, std::string> configOpts;
-	parseConfigFile("/home/bog/.ghost.config", configOpts, {"mail-server", "mail-user", "mail-passw", "mail-addr", "mail-from", "mail-signature", "mail-dest"});
-	std::vector<std::string> dest = strSplit(configOpts["mail-dest"], ',');
-    EMailer em(configOpts["mail-server"], configOpts["mail-user"], configOpts["mail-passw"], configOpts["mail-addr"], configOpts["mail-from"], configOpts["mail-signature"]);
+	std::string s1("macclesfield town");
+	std::string s2("erzgebirge aue");
+	std::string s3("macclesfield");
 
-    em.setVerbose(true);
-    em.send(dest, "test subject", "Salut bah, uite asta e un mesaj\r\nde test\r\ntrimis de maimuță\r\n");
+	auto r1 = StrComp(s1, s2).getStats();
+	auto r2 = StrComp(s1, s3).getStats();
+
+	std::cout << "a";
 }

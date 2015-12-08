@@ -30,8 +30,12 @@ bool removeDiacritics(std::string &in_out) {
 
 sanitizeResult sanitize(std::string &s) {
 	sanitizeResult res;
-	// 1. strip '.'
+	// 1a. strip '.'
 	s.erase(std::remove(s.begin(), s.end(), '.'), s.end());
+
+	// 1b. trim trailing spaces
+	while (s.back() == ' ')
+		s.pop_back();
 
 	// 2. replace '-' with ' '
 	std::replace(s.begin(), s.end(), '-', ' ');
@@ -42,7 +46,7 @@ sanitizeResult sanitize(std::string &s) {
 
 	// 4. tolower:
 	if (!res.failedDiacritics)
-		strLower(s);
+		s = strLower(s);
 
 	// 5. remove age restrictions:
 	size_t u19pos = 0, u21pos = 0;

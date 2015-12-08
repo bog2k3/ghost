@@ -33,16 +33,35 @@ std::vector<std::string> strSplit(std::string const& text, std::vector<char> con
 	return tokens;
 }
 
-void strLower(std::string &in_out) {
-	std::locale loc("en_US.UTF8");
-	auto &f = std::use_facet<std::ctype<char> >(loc);
-	f.tolower(const_cast<char*>(in_out.c_str()), in_out.c_str() + in_out.length());
+std::vector<std::string> strSplitPreserveQuotes(std::string const& text, std::vector<char> const& sep) {
+	auto q = strSplit(text, '"');
+	std::vector<std::string> res;
+	for (int i=0; i<q.size(); i++) {
+		if (i%2)	// odd parts are between quotes, we push them as-is
+			res.push_back(q[i]);
+		else {
+			auto qc = strSplit(q[i], sep);	// even parts must be split by usual separators
+			for (auto w : qc)
+				res.push_back(w);	// and pushed word by word
+		}
+	}
+	return res;
 }
 
-void strUpper(std::string &in_out) {
+std::string strLower(std::string const& str) {
 	std::locale loc("en_US.UTF8");
 	auto &f = std::use_facet<std::ctype<char> >(loc);
-	f.toupper(const_cast<char*>(in_out.c_str()), in_out.c_str() + in_out.length());
+	std::string res(str.c_str());
+	f.tolower(const_cast<char*>(res.c_str()), res.c_str() + res.length());
+	return res;
+}
+
+std::string strUpper(std::string const& str) {
+	std::locale loc("en_US.UTF8");
+	auto &f = std::use_facet<std::ctype<char> >(loc);
+	std::string res(str.c_str());
+	f.toupper(const_cast<char*>(res.c_str()), res.c_str() + res.length());
+	return res;
 }
 
 void replaceAllSubstr(std::string &str, std::string const& what, std::string const& replacement) {

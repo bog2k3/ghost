@@ -21,12 +21,11 @@ DummySQLSock::DummySQLSock(const char* filePath) {
 	}
 	std::string cnames;
 	std::getline(f, cnames);
-	auto labels = strSplit(cnames,';');
-	nColoane_ = labels.size();
+	numeColoane_ = strSplit(cnames,';');
+	nColoane_ = numeColoane_.size();
 	for (int i=0; i<nColoane_; i++) {
-		indexColoane_[i] = labels[i];
-		strUpper(labels[i]);	// column names will be uppercase
-		coloane_[labels[i]];
+		numeColoane_[i] = strUpper(numeColoane_[i]);	// column names will be uppercase
+		nume2Index_[numeColoane_[i]] = i;
 	}
 	std::string l;
 	while (std::getline(f, l)) {
@@ -42,8 +41,10 @@ DummySQLSock::~DummySQLSock() {
 }
 
 void DummySQLSock::insert(std::vector<std::string> const& val) {
+	std::vector<std::string> record;
 	for (int i=0; i<nColoane_; i++)
-		coloane_[indexColoane_[i]].push_back(i < val.size() ? val[i] : "");
+		record.push_back(i < val.size() ? val[i] : "");
+	records_.push_back(record);
 }
 
 bool DummySQLSock::connect(std::string const& URI, std::string const& user, std::string const& passw) {
@@ -78,8 +79,7 @@ enum class SQL_SORTDIR {
 };
 
 SQL_CMD getSQLCmd(std::string const& strCmd) {
-	auto upper = strCmd;
-	strUpper(upper);
+	auto upper = strUpper(strCmd);
 	if (upper == "SELECT")
 		return SQL_CMD::SELECT;
 	if (upper == "INSERT")
@@ -108,25 +108,28 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doSelect(std::vector<std::string> 
 		ERROR("invalid query: missing FROM");
 		return nullptr;
 	}
-	std::set<std::string> columns;
+	std::set<int> selectedCols;
 	if (tokens[crtTok] == "*") {
 		// select all columns
-		for (auto pair : coloane_)
-			columns.insert(pair.first);
+		for (int i=0; i<nColoane_; i++)
+			selectedCols.insert(i);
 		crtTok++;
 	} else while (crtTok < fromPos) {
 		// select columns listed in comma separated format
 		std::vector<std::string> cols = strSplit(upperTokens[crtTok], ',');
 		for (auto c : cols) {
-			if (coloane_.find(c) == coloane_.end()) {
+			if (c.empty())
+				continue;
+			if (nume2Index_.find(c) == nume2Index_.end()) {
 				ERROR("invalid query: unknown column " << c);
+				return nullptr;
 			}
-			columns.insert(c);
+			selectedCols.insert(nume2Index_[c]);
 		}
 		crtTok++;
 	}
-	// pass FROM:
-	crtTok++;
+	assertDbg(upperTokens[crtTok] == "FROM"); // am verificat mai sus sa existe FROM, deci e ok
+	crtTok++; // skip FROM
 	if (crtTok == tokens.size()) {
 		ERROR("invalid query: missing table name after FROM");
 		return nullptr;
@@ -136,17 +139,59 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doSelect(std::vector<std::string> 
 
 	bool order = false;
 	bool order_descending = false;
-	// WhereClause where;
-	if (crtTok < tokens.size()) {
+	WhereClause where;
+	while (crtTok < tokens.size()) {
 		// we have extra stuff like WHERE or ORDER
-	}
-//	std::unique_ptr<DummyResultSet> pRes(new DummyResultSet());
-	for (int i=0; i<nRecords_; i++) {
-		bool recordValid = true;// = where.pass(i);
-		if (recordValid) {
-			// add this record's values to the output
+		if (upperTokens[crtTok] == "ORDER") {
+			order = true;
+			if (++crtTok < tokens.size()) {
+				if (upperTokens[crtTok] == "DESC") {
+					order_descending = true;
+					crtTok++;
+				}
+				else if (upperTokens[crtTok] != "ASC") {
+					ERROR("invalid query: unexpected token after ORDER: " << tokens[crtTok]);
+					return nullptr;
+				}
+			}
+		} else if (upperTokens[crtTok] == "WHERE") {
+			crtTok++;
+			if (!where.parse(upperTokens, tokens, crtTok))
+				return nullptr;
+		} else {
+			ERROR("Unexpected token: " << tokens[crtTok]);
+			return nullptr;
 		}
 	}
+	
+	std::vector<int> ordinea;	// ordinea[i] - indexul coloanei reale selectata pe pozitia i
+	std::vector<std::string> numeSelectedCols;
+	std::vector<std::vector<std::string>> selectedValues;
+	for (int i : selectedCols) {
+		ordinea.push_back(i);
+		numeSelectedCols.push_back(numeColoane_[i]);
+//		selectedValues.push_back(std::vector<std::string>());
+	}
+
+	for (int i=0; i<records_.size(); i++) {
+		bool recordValid = where.validate(records_[i], nume2Index_);
+		if (recordValid) {
+			// add this record's values to the output
+			std::vector<std::string> selRecord;
+			for (int k=0; k<selectedCols.size(); k++)
+				selRecord.push_back(records_[i][ordinea[k]]);
+			selectedValues.push_back(selRecord);
+		}
+	}
+	if (order) {
+		for (int i=0; i<selectedValues[0].size()-1; i++) {
+			for (int j=i+1; j<selectedValues[0].size(); j++) {
+				// TODO verificam dupa ce coloana trebuie ordonate si interschimbam valorile de pe toate coloanele, linie cu linie
+			}
+		}
+	}
+
+	return std::unique_ptr<DummyResultSet>(new DummyResultSet(selectedValues, numeSelectedCols));
 }
 
 std::unique_ptr<sql::ResultSet> DummySQLSock::doInsert(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned crtTok) {
@@ -178,10 +223,10 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doQuery(std::string const& query) 
 
 	if (q.back() == ';')
 		q.pop_back();
-	std::vector<std::string> tokens = strSplit(q, ' ');
+	std::vector<std::string> tokens = strSplitPreserveQuotes(q, {' '});
 	std::vector<std::string> upperTokens = tokens;
-	for (auto s : upperTokens)
-		strUpper(s);
+	for (auto &s : upperTokens)
+		s = strUpper(s);
 	unsigned crtTok = 0;
 	switch (getSQLCmd(tokens[crtTok++])) {
 	case SQL_CMD::SELECT:
@@ -200,4 +245,12 @@ std::unique_ptr<sql::ResultSet> DummySQLSock::doQuery(std::string const& query) 
 		ERROR("Invalid SQL command: " + tokens[crtTok-1]);
 		return nullptr;
 	}
+}
+
+bool WhereClause::parse(std::vector<std::string> const& upperTokens, std::vector<std::string> const& tokens, unsigned &crtTok) {
+
+}
+
+bool WhereClause::validate(std::vector<std::string> const& record, std::map<std::string, int> const& name2Index) {
+
 }
