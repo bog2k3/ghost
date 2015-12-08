@@ -119,7 +119,7 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, s
 
 		// Retrieve similar strings into a string vector.
 		std::vector<std::string> xstrs;
-		float thresh = 0.5f;
+		float thresh = 0.8f;
 		// try overlap first:
 		do {
 			xstrs.clear();
