@@ -17,58 +17,18 @@
         
         if (is_null($RETURN_VALUE)) {
             $RETURN_VALUE="ERROR";
+        } else {
+            $RETURN_VALUE = substr($RETURN_VALUE,0,-1);
         }
         
         return $RETURN_VALUE;
     }
     
-    function print_untranslated_teams($sport) {
+    function send_mail($message) {
         
-        include 'database_setup.php';
+        mail('','Maimuta PHP',$message);
         
-        $con = mysqli_connect($servername,$username,$password,$database,$database_port);
-
-        if (!$con) {
-            die("Connection failed: " . mysqli_error($con));
-        }
-        
-        $query = "select * from ( ".
-                 " select echipa1 as echipa,site_id_1 as site from fotbal where status_echipe in (1,3) "
-                 ." union ".
-                 " select echipa2 as echipa,site_id_1 as site from fotbal where status_echipe in (2,3) ".
-                " ) as t order by t.site";
-        $result = mysqli_query($con,$query);
-        
-        //echo $query;
-        
-        $html = '<table id="ftable">';
-        $html .= '<tr><th> Site </th><th> Echipa 2 </th>';
-        
-        while ($row = mysqli_fetch_assoc($result)) {
-            
-            if (getInternalTeam($con,$row["echipa"],$row["site"]) == '') {
-                $html .= '<tr onClick="HighLightTR(this,\'#c9cc99\',\'cc3333\');set_intput_values(\''.$row["site"].'\',\''.$row["echipa"].'\',\'\');">';
-
-                $html .= '<td><b>';
-                $html .= $row["site"];
-                $html .= '</b></td>';
-
-                $html .= '<td>';
-                $html .= $row["echipa"];
-                $html .= '</td>';
-
-                $html .= '</tr>';
-            }
-            
-        }
-        
-        $html .= '</table>';
-        
-        mysqli_free_result($result);
-        
-        return $html;
-        
-        mysqli_close($con);
     }
+    
     
 ?>

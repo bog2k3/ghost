@@ -3,22 +3,32 @@
  * autor : dan
  */
 
-// http://www.stanleysports.ro/oferta.php?f=fotbal&z=1 - aici incepem
+// http://www.stanleysports.ro/oferta.php?f=fotbal&d=0 - aici incepem
 
 var changeStanley_day = function ( day ) {
     
     console.debug(day);
     
     // se extrag butoanele de zile
-    var butoane_zile_main_div = document.getElementById("menu4");
+    /*var butoane_zile_main_div = document.getElementById("menu4");
     
     // primul element din lista e un text si ultimul lafel asa ca incepem la +1
     var buton = butoane_zile_main_div.childNodes[day+1];
     
+    // trebuie sa dam click si pe fotbal ca mujisti nu mai fac direct filtrare
+    var button_fotbal = document.getElementsByClassName("_nd_menu_new");*/
+    
+    
     // click pe fraier
     setTimeout(function() {
-        buton.click();
+        window.location.href="http://www.stanleysports.ro/oferta.php?d="+day+"&p=&f=fotbal";
+        //buton.click();
     },3000);
+
+    // click si pe asta
+    /*setTimeout(function() {
+        button_fotbal[0].click();
+    },3000);*/
 }
 
 

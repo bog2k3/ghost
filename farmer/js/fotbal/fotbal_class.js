@@ -70,6 +70,8 @@ function meci_fotbal() {
             bucati_data[1] = "0"+bucati_data[1];
         
         this.data = bucati_data[1]+"/"+bucati_data[0]+"/"+currentTime.getFullYear();
+        // 8 decembrie 2015 adaugam si ora
+        this.data +=(" "+data_split[1].substring(0,5));
         
         //trecem la cote
         
@@ -146,6 +148,9 @@ function meci_fotbal() {
                 echipe = text.replace(/(\r\n|\n|\r)/gm,"").slice(16).split(":");
                 
                 this.data=data[0];
+                // 8 decembrie 2015 se aduga si data
+                this.data+=(" "+data[1].substring(0,5));
+                
                 this.echipa1=echipe[0];
                 this.echipa2=echipe[1];
                 break;

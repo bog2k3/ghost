@@ -27,7 +27,7 @@
             game_id		- varchar(12)
             hash_joc_unic	- varchar(64) (PK)
             hash_joc_comun          - varchar(64)
-            data_joc                - varchar(10)
+            data_joc                - varchar(16)
             status_echipe           - int(1) - valori posibile 0 - echipele exista in DD 1 - echipa1 nu exista 2-echipa2 nu exista 3-niciuna din echipe nu exista
     ************************************************/
 
@@ -112,14 +112,14 @@
     // se extrag echipele traduse din baza de date
     $echipa1_internal = getInternalTeam($con,$echipa1); 
        
-    if (strcmp(preg_replace('/\s+/','',$echipa1_internal),$nec)==0 || strcmp(preg_replace('/\s+/','',$echipa1_internal),$err)==0) {
+    if (strcmp($echipa1_internal,$nec)==0 || strcmp($echipa1_internal,$err)==0) {
         $status_echipe+=1;
 	$echipa1_internal = $echipa1;
     }
     
     $echipa2_internal = getInternalTeam($con,$echipa2); 
     
-    if (strcmp(preg_replace('/\s+/','',$echipa2_internal),$nec)==0 || strcmp(preg_replace('/\s+/','',$echipa2_internal),$err)==0){
+    if (strcmp($echipa2_internal,$nec)==0 || strcmp($echipa2_internal,$err)==0){
         $status_echipe+=2;
 	$echipa2_internal = $echipa2;
     }
@@ -152,24 +152,39 @@
     } else {
 
         // se creaza insertup
-
-        $query = 'insert into fotbal(echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id,game_id,hash_joc_unic,hash_joc_comun,data_joc,status_echipe) values'. 
-                '('.
-                '\''.$echipa1_internal.'\''.','.
-                '\''.$echipa2_internal.'\''.','.
-                $cota1.','.
-                $cota2.','.
-                $cotax.','.
-                $cota1x.','.
-                $cota2x.','.
-                $cota12.','.
-                '\''.$site.'\''.','.
-                '\''.$game.'\''.','.
-                '\''.$hash_game_pk.'\','.
-                '\''.$hash_game_comun.'\','.
-                '\''.$game_date.'\','.
-                $status_echipe.
-                ')';
+        if (strcmp($echipa1_internal,$echipa2_internal)==0) {
+            // daca este aceeasi echipa ... lucru care nu ar trebui sa se intample se trimite mail 
+            // cu requestul si cu insertul rezultat
+            
+            $message =  "Eroare acceasi echipa \n\n".
+                        "Input :\n".
+                        "echipa1 = ".$echipa1."\n".
+                        "echipa2 = ".$echipa2."\n".
+                        "site = ".$site."\n\n".
+                        "Output :\n".
+                        "echipa1 tradusa = ".$echipa1_internal."\n".
+                        "echipa2 tradusa = ".$echipa2_internal."\n";
+            send_mail($message);
+            
+        } else {
+            $query = 'insert into fotbal(echipa1,echipa2,cota_1,cota_2,cota_x,cota_1x,cota_2x,cota_12,site_id,game_id,hash_joc_unic,hash_joc_comun,data_joc,status_echipe) values'. 
+                    '('.
+                    '\''.$echipa1_internal.'\''.','.
+                    '\''.$echipa2_internal.'\''.','.
+                    $cota1.','.
+                    $cota2.','.
+                    $cotax.','.
+                    $cota1x.','.
+                    $cota2x.','.
+                    $cota12.','.
+                    '\''.$site.'\''.','.
+                    '\''.$game.'\''.','.
+                    '\''.$hash_game_pk.'\','.
+                    '\''.$hash_game_comun.'\','.
+                    '\''.$game_date.'\','.
+                    $status_echipe.
+                    ')';
+        }
     }
 
 
