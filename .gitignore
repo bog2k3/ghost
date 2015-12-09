@@ -42,4 +42,6 @@ eclipse.sh
 */Release/cupid
 */Debug/watchdog
 */Release/watchdog
+*/Debug/test
+*/Release/test
 
