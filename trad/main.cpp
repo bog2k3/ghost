@@ -8,6 +8,7 @@
 
 #include "daemon.h"
 #include "../common/log.h"
+#include "../common/dir.h"
 
 #include <iostream>
 #include <string>
@@ -71,6 +72,15 @@ int main(int argc, char* argv[]) {
 				"trad --config ~/.ghost.config --sport fotbal [--lpath path] [--cpath path] \"Echipa unu\" \"echipa doi\" ...\n");
 		return -1;
 	}
+
+	if (!pathExists(cachePath+"/.trad"))
+		mkDirRecursive(cachePath+"/.trad");
+#ifndef DEBUG
+	std::ofstream logFile(cachePath + "/.trad/trad.log", std::ios::app);
+	logger::setLogStream(&logFile);
+#endif
+	std::ofstream errFile(cachePath + "/.trad/trad_err.log", std::ios::app);
+	logger::setAdditionalErrStream(&errFile);
 
 	Daemon daemon(configPath, listePath, cachePath);
 

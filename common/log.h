@@ -14,13 +14,24 @@
 
 #include <iostream>
 #include <string>
+#include <ostream>
 
 #define LOGPREFIX(PREF) logger_prefix logger_prefix_token(PREF);
 
-#define LOG(X) { logger::writeprefix(std::cout); std::cout << X; }
-#define LOGNP(X) std::cout << X
+#define LOG(X) { if (logger::getLogStream()) {\
+	logger::writeprefix(*logger::getLogStream());\
+	*logger::getLogStream() << X;\
+	}\
+}
+#define LOGNP(X) { if (*logger::getLogStream()) *logger::getLogStream() << X }
 #define LOGLN(X) LOG(X << "\n")
-#define ERROR(X) { std::cerr << "[ERROR]"; logger::writeprefix(std::cerr); std::cerr << X << "\n"; }
+#define ERROR(X) {\
+	for (auto stream : {&std::cerr, logger::getErrStream()}) {\
+		*stream << "[ERROR]";\
+		logger::writeprefix(*stream);\
+		*stream << X << "\n";\
+	}\
+}
 
 #else
 #define LOG(X)
@@ -29,7 +40,6 @@
 #define ERROR(X)
 #endif
 
-#include <string>
 #include <deque>
 #include <stack>
 
@@ -37,7 +47,25 @@ class logger {
 public:
 	static void writeprefix(std::ostream &stream);
 
+	// returns old stream
+	static std::ostream* setLogStream(std::ostream* newStream) {
+		std::ostream* pOld = pLogStream_;
+		pLogStream_ = newStream;
+		return pOld;
+	}
+	// returns old stream
+	static std::ostream* setAdditionalErrStream(std::ostream* newStream) {
+		std::ostream* pOld = pErrStream_;
+		pErrStream_ = newStream;
+		return pOld;
+	}
+
+	static std::ostream* getLogStream() { return pLogStream_; }
+	static std::ostream* getErrStream() { return pErrStream_; }
+
 private:
+	static std::ostream* pLogStream_;
+	static std::ostream* pErrStream_;
 	static std::deque<std::string> prefix_;
 	static logger instance_;
 
