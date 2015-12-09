@@ -7,6 +7,7 @@
 
 #include "sanitize.h"
 #include "strManip.h"
+#include "assert.h"
 #include <map>
 #include <locale>
 #include <algorithm>
@@ -33,10 +34,6 @@ sanitizeResult sanitize(std::string &s) {
 	// 1a. strip '.'
 	s.erase(std::remove(s.begin(), s.end(), '.'), s.end());
 
-	// 1b. trim trailing spaces
-	while (s.back() == ' ')
-		s.pop_back();
-
 	// 2. replace '-' with ' '
 	std::replace(s.begin(), s.end(), '-', ' ');
 
@@ -49,23 +46,43 @@ sanitizeResult sanitize(std::string &s) {
 		s = strLower(s);
 
 	// 5. remove age restrictions:
-	size_t u19pos = 0, u21pos = 0;
-	if ((u19pos = s.find("u19")) != s.npos) {
+	size_t pos = 0;
+	if ((pos = s.find("u19")) != s.npos) {
 		res.age_u19 = true;
-		s = s.substr(0, u19pos) + s.substr(u19pos+3);
+		s = s.substr(0, pos) + s.substr(pos+3);
 	}
-	if ((u19pos = s.find("u 19")) != s.npos) {
+	if ((pos = s.find("u 19")) != s.npos) {
 		res.age_u19 = true;
-		s = s.substr(0, u19pos) + s.substr(u19pos+4);
+		s = s.substr(0, pos) + s.substr(pos+4);
 	}
-	if ((u21pos = s.find("u21")) != s.npos) {
+	if ((pos = s.find("u20")) != s.npos) {
+		res.age_u20 = true;
+		s = s.substr(0, pos) + s.substr(pos+3);
+	}
+	if ((pos = s.find("u 20")) != s.npos) {
+		res.age_u20 = true;
+		s = s.substr(0, pos) + s.substr(pos+4);
+	}
+	if ((pos = s.find("u21")) != s.npos) {
 		res.age_u21 = true;
-		s = s.substr(0, u21pos) + s.substr(u21pos+3);
+		s = s.substr(0, pos) + s.substr(pos+3);
 	}
-	if ((u21pos = s.find("u 21")) != s.npos) {
+	if ((pos = s.find("u 21")) != s.npos) {
 		res.age_u21 = true;
-		s = s.substr(0, u21pos) + s.substr(u21pos+4);
+		s = s.substr(0, pos) + s.substr(pos+4);
 	}
+	if ((pos = s.find("(t)")) != s.npos) {
+		res.tineret = true;
+		s = s.substr(0, pos) + s.substr(pos+3);
+	}
+	if ((pos = s.find("(f)")) != s.npos) {
+		res.feminin = true;
+		s = s.substr(0, pos) + s.substr(pos+3);
+	}
+
+	// 6. trim trailing spaces
+	while (s.back() == ' ')
+		s.pop_back();
 
 	return res;
 }

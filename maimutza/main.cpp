@@ -23,8 +23,10 @@
 #include "../common/strManip.h"
 #include "../common/eMailer.h"
 #include "../common/sanitize.h"
+#include "../common/dir.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <cstring>
@@ -68,14 +70,14 @@ double fitness(StrComp::Result const& res) {
 }
 
 bool acceptCondition(StrComp::Result const& res) {
-	constexpr float accept_thresh_idrwr = 0.78f;
+	constexpr float accept_thresh_idrwr = 0.8f;
 	return res.identicalWords >= 1 && fitness(res)  >= accept_thresh_idrwr;
 }
 
 bool processNetrad(std::string& a1, std::string& a2,
 					std::string& b1, std::string& b2,
 					listFile &lf,
-					std::vector<std::pair<std::string, std::string>> &dubioase) {
+					std::vector<std::pair<std::string, std::string>> &suspecte) {
 	sanitize(a1); sanitize(a2);
 	sanitize(b1); sanitize(b2);
 	StrComp scA(a1, b1);
@@ -98,7 +100,8 @@ bool processNetrad(std::string& a1, std::string& a2,
 	if (!acceptCondition(*statSmall)) {
 		std::string &s1r = statSmall == &statA ? statA.s1 : statB.s1;
 		std::string &s2r = statSmall == &statA ? statA.s2 : statB.s2;
-		dubioase.push_back(std::make_pair(s1r, s2r));
+		suspecte.push_back(std::make_pair(s1r, s2r));
+		LOGLN("SUSPECT: " << s1r << "   ~   " << s2r << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	}
 	lf.addNewAlias(a1, b1);
 	LOGLN(b1 << "  ->  " << a1);
@@ -108,7 +111,7 @@ bool processNetrad(std::string& a1, std::string& a2,
 }
 
 bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
-		std::vector<std::pair<std::string, std::string>> &dubioase,
+		std::vector<std::pair<std::string, std::string>> &suspecte,
 		std::vector<meciInfo> *postponed) {
 	switch (crt.statusTrad) {
 	case 3:
@@ -121,9 +124,9 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 		// then a1 vs b2 & a2 vs b1
 		for (int cross=0; cross<2; cross++) {
 			if (cross) {
-				if (processNetrad(crt.echipa1, crt.echipa2, r2.echipa1, r2.echipa2, lf, dubioase))
+				if (processNetrad(crt.echipa1, crt.echipa2, r2.echipa1, r2.echipa2, lf, suspecte))
 					return true;
-			} else if (processNetrad(crt.echipa2, crt.echipa1, r2.echipa1, r2.echipa2, lf, dubioase))
+			} else if (processNetrad(crt.echipa2, crt.echipa1, r2.echipa1, r2.echipa2, lf, suspecte))
 				return true;
 		}
 		return false;
@@ -146,7 +149,8 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				LOGLN(*pNetrad << "  ->  " << *pEchiv);
 				if (!acceptCondition(cstat)) {
 					// e dubios, nu prea se potriveste, dam warning pe mail
-					dubioase.push_back(std::make_pair(*pEchiv, *pNetrad));
+					suspecte.push_back(std::make_pair(*pEchiv, *pNetrad));
+					LOGLN("SUSPECT: " << *pEchiv << "   ~   " << *pNetrad << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				}
 				return true;
 			} else
@@ -166,15 +170,15 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				LOGLN(*pR2Netrad << "  ->  " << *pNetrad);
 				if (!acceptCondition(cstat)) {
 					// e dubios, nu prea se potriveste, dam warning pe mail
-					dubioase.push_back(std::make_pair(*pNetrad, *pR2Netrad));
-					LOGLN("DUBIOS:  " << *pNetrad << "   ~   " << *pR2Netrad);
+					suspecte.push_back(std::make_pair(*pNetrad, *pR2Netrad));
+					LOGLN("SUSPECT: " << *pNetrad << "   ~   " << *pR2Netrad << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				}
 				return true;
 			} else {
 				// s-ar putea ca fiecare echipa tradusa sa fie echivalenta cu cea netradusa, verificam:
 				// A: pTrad vs pR2Netrad
 				// B: pNetrad vs pR2Trad
-				return processNetrad(*pTrad, *pNetrad, *pR2Netrad, *pR2Trad, lf, dubioase);
+				return processNetrad(*pTrad, *pNetrad, *pR2Netrad, *pR2Trad, lf, suspecte);
 			}
 		}
 		break;
@@ -234,7 +238,8 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		return;
 	}
 
-	std::vector<std::pair<std::string, std::string>> dubioase;
+	std::vector<std::pair<std::string, std::string>> suspecte;
+	std::vector<meciInfo> meciuriSingulare;
 	std::vector<meciInfo> postponed;
 
 	for (int pas=1; pas <= 2; pas++) {
@@ -257,7 +262,15 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		else
 			crtList.swap(postponed);
 
+		LOGLN("pas " << pas << "; " << crtList.size() << " meciuri netraduse");
+
+//#ifdef DEBUG
+//		int crtIndex = 0;
+//#endif
 		for (auto crt : crtList) {
+//#ifdef DEBUG
+//			LOGLN(crtIndex++);
+//#endif
 			// cautam meciuri simultane ca sa incercam sa traducem echipele:
 			auto res2 = sock.doQuery(
 				"SELECT "+
@@ -265,12 +278,18 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				dbLabels.echipa2+","+
 				dbLabels.statusTraduceri+
 				" FROM " + tabel +
-				" WHERE " + dbLabels.data + " = \""+crt.data+"\" "+
-				" AND " + dbLabels.statusTraduceri + " != 3"+
+				" WHERE " + dbLabels.data + " = '"+crt.data+"' "+
+				((pas == 1)
+					? " AND " + dbLabels.statusTraduceri + " != 3"
+					: "") +
 				" ORDER BY " + dbLabels.statusTraduceri + " ASC");	// vrem echipele traduse (status=0) la inceput daca e posibil
 
-			if (!res2 && pas == 1) {
+			if ((!res2 || !res2->rowsCount()) && pas == 1) {
 				postponed.push_back(crt);
+#ifdef DEBUG
+				if (pas == 2)
+					LOGLN("!!! Nici un meci simultan cu " << crt.echipa1 << " vs " << crt.echipa2 << " " << crt.data);
+#endif
 				continue;
 			}
 
@@ -297,6 +316,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 			 * 		echipele care nu au putut fi traduse intr-un email)
 			 */
 
+			bool found = false;
 			while (res2->next()) {
 				meciInfo r2;
 				r2.echipa1 = res2->getString(dbLabels.echipa1);
@@ -304,28 +324,55 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				r2.data = crt.data;
 				r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
 
-				process(crt, r2, lf, dubioase, pas == 1 ? &postponed : nullptr);
+				found |= process(crt, r2, lf, suspecte, pas == 1 ? &postponed : nullptr);
+			}
+
+			if (!found) {
+				if (pas == 1)
+					postponed.push_back(crt);
+				else {
+					// daca a ajuns aici, inseamna ca nu s-a gasit nici un meci simultan care sa fie acceptabil, ceea ce e
+					// DUBIOS RAU
+					meciuriSingulare.push_back(crt);
+				}
 			}
 		} // for crt
 	} // for pas
 
-//	if (saveListFile(listFilePath, lf) != listFile::IO_OK)
-//		ERROR("Nu am putut salva lista in " + listFilePath);
+#ifndef DEBUG
+	if (saveListFile(listFilePath, lf) != listFile::IO_OK)
+		ERROR("Nu am putut salva lista in " + listFilePath);
+#endif
 
-	// dam mail cu echipele dubioase:
-	if (dubioase.size()) {
+#ifndef DEBUG
+	// dam mail cu echipele suspecte:
+	if (suspecte.size()) {
 		std::stringstream ss;
-		for (auto d : dubioase) {
-			ss << d.first << "   ?   " << d.second << "\r\n";
+		if (suspecte.size()) {
+			ss << "Traduceri suspecte >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n\r\n";
+			for (auto d : suspecte) {
+				ss << d.first << "   ?   " << d.second << "\r\n";
+			}
 		}
-		pEmailer->send(emailRecipients, "Match-uri DUBIOASE", ss.str());
+		if (meciuriSingulare.size()) {
+			ss << "Meciuri SINGULARE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n";
+			ss << "(adica nu mai exista altul simultan care sa se potriveasca)\r\n\r\n";
+			for (auto s : meciuriSingulare)
+				ss << s.echipa1 << " vs " << s.echipa2 << "  " << s.data << "\r\n";
+		}
+		if (!ss.eof())
+			pEmailer->send(emailRecipients, "Suspecte & Singulare", ss.str());
 	}
+#endif
+	LOGNP("\n\n");
+	LOGLN("STATISTICI:");
+	LOGLN(suspecte.size() << " traduceri suspecte.");
+	LOGLN(meciuriSingulare.size() << " meciuri singulare.");
 }
 
 int main(int argc, char* argv[]) {
-	LOGPREFIX("maimuță");
-	std::locale::global(std::locale(""));
-	std::cout.imbue(std::locale(""));
+//	std::locale::global(std::locale(""));
+//	std::cout.imbue(std::locale(""));
 
 	std::map<std::string, std::string> cmdOpts;
 	cmdOpts[cmdLine.listePath] = ".";
@@ -335,6 +382,21 @@ int main(int argc, char* argv[]) {
 				"maimutza --table fotbal --config ~/.maimutza.config --lPath path/to/liste");
 		return -1;
 	}
+
+	const char* pHomeDir = getenv("HOME");
+	if (pHomeDir) {
+		std::string homeDir(pHomeDir);
+		if (!pathExists(homeDir+"/.maimutza"))
+			if (!mkDir(homeDir+"/.maimutza")) {
+				ERROR("Nu am putut crea directorul ~/.maimutza\nLogurile nu vor fi salvate!!!");
+			} else {
+				std::ofstream fErrLog(std::string(pHomeDir) + "/.maimutza/error.log", std::ios::app);
+				logger::setAdditionalErrStream(&fErrLog);
+			}
+	} else {
+		ERROR("Nu s-a putut accesa $HOME\nLogurile nu vor fi salvate!!!");
+	}
+
 	std::map<std::string, std::string> configOpts;
 	if (!cmdOpts["config"].empty())
 		if (!parseConfigFile(cmdOpts["config"], configOpts, {config.dbURI, config.dbUser, config.dbPassw, config.dbName,
@@ -364,10 +426,13 @@ int main(int argc, char* argv[]) {
 	LOGLN("maimuța incepe loop-ul de cautat echipe netraduse si adaugat in liste...");
 
 	while (true) { // maimuța e nemuritoare!!! muhahaha !!
+		LOGLN("Maimutza face un pas...");
 		maimutareste(*pSock, cmdOpts[cmdLine.table], cmdOpts[cmdLine.listePath]);
-		sleep(10); // maimuța doarme 10 secunde intre incercari
-
+#ifdef DEBUG
 		break;
+#endif
+		LOGLN("doarme 10s...");
+		sleep(10); // maimuța doarme 10 secunde intre incercari
 	}
 
 	delete pEmailer;

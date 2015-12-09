@@ -143,8 +143,14 @@ std::vector<std::string> Daemon::match(std::vector<std::string> const& numeIn, s
 			std::string numeStd = sportData_[sport].alternateNameMap[xstrs[0]];
 			if (sanRes[i].age_u19)
 				numeStd += " U19";
+			if (sanRes[i].age_u20)
+				numeStd += " U20";
 			if (sanRes[i].age_u21)
 				numeStd += " U21";
+			if (sanRes[i].tineret)
+				numeStd += " (T)";
+			if (sanRes[i].feminin)
+				numeStd += " (F)";
 			ret.push_back(numeStd);
 		} else
 			ret.push_back("NECUNOSCUT");

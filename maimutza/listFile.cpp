@@ -26,12 +26,18 @@ void listFile::addNewAlias(std::string key, std::string alias) {
 			key = alias;
 			alias = aux;
 		}
-		lines.push_back({key, alias});
+		if (key!=alias)
+			lines.push_back({key, alias});
+		else
+			lines.push_back({key});
 		names2Lines[key] = names2Lines[alias] = lines.size() - 1;
 	} else {
 		auto &crtLine = lines[line->second];
-		crtLine.push_back(alias);
-		std::sort(crtLine.begin(), crtLine.end(), betterKey);
+		// check if not present already, then add:
+		if (std::find(crtLine.begin(), crtLine.end(), alias) == crtLine.end()) {
+			crtLine.push_back(alias);
+			std::sort(crtLine.begin(), crtLine.end(), betterKey);
+		}
 	}
 }
 

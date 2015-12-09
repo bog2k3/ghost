@@ -18,15 +18,32 @@
 
 #define LOGPREFIX(PREF) logger_prefix logger_prefix_token(PREF);
 
+#ifdef DEBUG
+#define LOG(X) {\
+	if (logger::getLogStream()) {\
+		logger::writeprefix(*logger::getLogStream());\
+		*logger::getLogStream() << X;\
+	}\
+	/* also put the log on stdout in DEBUG mode */\
+	if (logger::getLogStream() != &std::cout) {\
+		logger::writeprefix(std::cout);\
+		std::cout << X;\
+	}\
+}
+#else
 #define LOG(X) { if (logger::getLogStream()) {\
 	logger::writeprefix(*logger::getLogStream());\
 	*logger::getLogStream() << X;\
 	}\
 }
-#define LOGNP(X) { if (*logger::getLogStream()) *logger::getLogStream() << X }
+#endif
+
+#define LOGNP(X) { if (*logger::getLogStream()) *logger::getLogStream() << X; }
 #define LOGLN(X) LOG(X << "\n")
 #define ERROR(X) {\
 	for (auto stream : {&std::cerr, logger::getErrStream()}) {\
+		if (!stream)\
+			continue;\
 		*stream << "[ERROR]";\
 		logger::writeprefix(*stream);\
 		*stream << X << "\n";\

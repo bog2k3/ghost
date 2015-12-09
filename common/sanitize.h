@@ -14,7 +14,10 @@
 struct sanitizeResult {
 	bool failedDiacritics = false;
 	bool age_u19 = false;
+	bool age_u20 = false;
 	bool age_u21 = false;
+	bool tineret = false;
+	bool feminin = false;
 };
 
 sanitizeResult sanitize(std::string &s);

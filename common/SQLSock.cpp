@@ -26,11 +26,11 @@ bool SQLSock::connect(std::string const& URI, std::string const& user, std::stri
 
 		  return true;
 		} catch (sql::SQLException &e) {
-			std::cout << "# ERR: SQLException in " << __FILE__;
-			std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
-			std::cout << "# ERR: " << e.what();
-			std::cout << " (MySQL error code: " << e.getErrorCode();
-			std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+			std::cerr << "# ERR: SQLException in " << __FILE__;
+			std::cerr << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
+			std::cerr << "# ERR: " << e.what();
+			std::cerr << " (MySQL error code: " << e.getErrorCode();
+			std::cerr << ", SQLState: " << e.getSQLState() << " )" << std::endl;
 
 			return false;
 		}
@@ -42,11 +42,11 @@ bool SQLSock::setDB(std::string const& databaseName) {
 
 		return true;
 	} catch (sql::SQLException &e) {
-		std::cout << "# ERR: SQLException in " << __FILE__;
-		std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
-		std::cout << "# ERR: " << e.what();
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		std::cerr << "# ERR: SQLException in " << __FILE__;
+		std::cerr << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
+		std::cerr << "# ERR: " << e.what();
+		std::cerr << " (MySQL error code: " << e.getErrorCode();
+		std::cerr << ", SQLState: " << e.getSQLState() << " )" << std::endl;
 
 		return false;
 	}
@@ -61,11 +61,11 @@ std::unique_ptr<sql::ResultSet> SQLSock::doQuery(std::string const& query) {
 		delete stmt;
 		return std::unique_ptr<sql::ResultSet>(res);
 	} catch (sql::SQLException &e) {
-		std::cout << "# ERR: SQLException in " << __FILE__;
-		std::cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
-		std::cout << "# ERR: " << e.what();
-		std::cout << " (MySQL error code: " << e.getErrorCode();
-		std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		std::cerr << "# ERR: SQLException in " << __FILE__;
+		std::cerr << "(" << __FUNCTION__ << ") on line " << __LINE__ << std::endl;
+		std::cerr << "# ERR: " << e.what();
+		std::cerr << " (MySQL error code: " << e.getErrorCode();
+		std::cerr << ", SQLState: " << e.getSQLState() << " )" << std::endl;
 
 		return nullptr;
 	}
