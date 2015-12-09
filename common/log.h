@@ -31,9 +31,10 @@
 	}\
 }
 #else
-#define LOG(X) { if (logger::getLogStream()) {\
-	logger::writeprefix(*logger::getLogStream());\
-	*logger::getLogStream() << X;\
+#define LOG(X) {\
+	if (logger::getLogStream()) {\
+		logger::writeprefix(*logger::getLogStream());\
+		*logger::getLogStream() << X;\
 	}\
 }
 #endif
@@ -56,6 +57,8 @@
 #define LOGLN(X)
 #define ERROR(X)
 #endif
+
+#ifdef _ENABLE_LOGGING_
 
 #include <deque>
 #include <stack>
@@ -101,5 +104,7 @@ public:
 		logger::pop_prefix();
 	}
 };
+
+#endif // _ENABLE_LOGGING_
 
 #endif /* LOG_H_ */

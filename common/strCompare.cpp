@@ -114,10 +114,8 @@ void StrComp::getNGramResemblance(int n, std::string const& s1, std::string cons
 
 StrComp::Result StrComp::getStats(const WordFreqMap* pFreqMap) {
 	StrComp::Result res;
-#ifdef DEBUG
 	res.s1 = s1_;
 	res.s2 = s2_;
-#endif
 	if (s1w_.empty() || s2w_.empty())
 		return res;
 

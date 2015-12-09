@@ -6,6 +6,9 @@
  */
 
 #include "log.h"
+
+#ifdef _ENABLE_LOGGING_
+
 #include <ctime>
 #include <sstream>
 #include <iomanip>
@@ -42,3 +45,5 @@ void logger::writeprefix(std::ostream &stream) {
 	if (prefix_.size())
 		stream << "] ";
 }
+
+#endif // _ENABLE_LOGGING_
