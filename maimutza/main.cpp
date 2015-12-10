@@ -24,11 +24,13 @@
 #include "../common/eMailer.h"
 #include "../common/sanitize.h"
 #include "../common/dir.h"
+#include "../common/wordFreq.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <cstring>
 #include <unistd.h>
 
@@ -77,13 +79,14 @@ bool acceptCondition(StrComp::Result const& res) {
 bool processNetrad(std::string& a1, std::string& a2,
 					std::string& b1, std::string& b2,
 					listFile &lf,
+					WordFreqMap const& fmap,
 					std::vector<std::pair<std::string, std::string>> &suspecte) {
 	sanitize(a1); sanitize(a2);
 	sanitize(b1); sanitize(b2);
 	StrComp scA(a1, b1);
 	StrComp scB(a2, b2);
-	auto statA = scA.getStats();
-	auto statB = scB.getStats();
+	auto statA = scA.getStats(&fmap);
+	auto statB = scB.getStats(&fmap);
 	decltype(statA) *statBig = &statA, *statSmall = &statB;
 	// verificam daca sunt in ordinea corecta (statBig se potriveste mai mult decat statSmall)
 	// si interschimbam daca nu:
@@ -111,6 +114,7 @@ bool processNetrad(std::string& a1, std::string& a2,
 }
 
 bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
+		WordFreqMap const& fmap,
 		std::vector<std::pair<std::string, std::string>> &suspecte,
 		std::vector<meciInfo> *postponed) {
 	switch (crt.statusTrad) {
@@ -124,9 +128,9 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 		// then a1 vs b2 & a2 vs b1
 		for (int cross=0; cross<2; cross++) {
 			if (cross) {
-				if (processNetrad(crt.echipa1, crt.echipa2, r2.echipa1, r2.echipa2, lf, suspecte))
+				if (processNetrad(crt.echipa1, crt.echipa2, r2.echipa1, r2.echipa2, lf, fmap, suspecte))
 					return true;
-			} else if (processNetrad(crt.echipa2, crt.echipa1, r2.echipa1, r2.echipa2, lf, suspecte))
+			} else if (processNetrad(crt.echipa2, crt.echipa1, r2.echipa1, r2.echipa2, lf, fmap, suspecte))
 				return true;
 		}
 		return false;
@@ -144,7 +148,7 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				sanitize(*pNetrad);
 				sanitize(*pEchiv);
 				StrComp comp(*pNetrad, *pEchiv);
-				auto cstat = comp.getStats();
+				auto cstat = comp.getStats(&fmap);
 				lf.addNewAlias(*pEchiv, *pNetrad);
 				LOGLN(*pNetrad << "  ->  " << *pEchiv);
 				if (!acceptCondition(cstat)) {
@@ -165,7 +169,7 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				sanitize(*pR2Netrad);
 				sanitize(*pNetrad);
 				StrComp scomp(*pR2Netrad, *pNetrad);
-				auto cstat = scomp.getStats();
+				auto cstat = scomp.getStats(&fmap);
 				lf.addNewAlias(*pNetrad, *pR2Netrad);
 				LOGLN(*pR2Netrad << "  ->  " << *pNetrad);
 				if (!acceptCondition(cstat)) {
@@ -178,7 +182,7 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				// s-ar putea ca fiecare echipa tradusa sa fie echivalenta cu cea netradusa, verificam:
 				// A: pTrad vs pR2Netrad
 				// B: pNetrad vs pR2Trad
-				return processNetrad(*pTrad, *pNetrad, *pR2Netrad, *pR2Trad, lf, suspecte);
+				return processNetrad(*pTrad, *pNetrad, *pR2Netrad, *pR2Trad, lf, fmap, suspecte);
 			}
 		}
 		break;
@@ -191,12 +195,25 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 	// 1. incarcam listele:
 	auto listFilePath = listePath+'/'+tabel;
 	listFile lf = loadListFile(listFilePath);
+
+	// 2. build freq map:
+	WordFreqMap fmap;
+	for (auto line : lf.lines) {
+		std::vector<std::string> words;
+		for (auto alias : line) {
+			auto aliasTok = strSplit(alias, ' ');
+			for (auto tok : aliasTok)
+				if (std::find(words.begin(), words.end(), tok) == words.end())
+					words.push_back(tok);
+		}
+		fmap.addWordList(words);
+	}
 	if (lf.io_result != listFile::IO_OK) {
 		ERROR("maimuța nu poate deschide listele!!! \"" << listePath+'/'+tabel << "\"");
 		return;
 	}
 
-	// 1.5. facem un sanity test pe baza de date:
+	// 3. facem un sanity test pe baza de date:
 	auto res = sock.doQuery(
 			"SELECT "+
 			dbLabels.echipa1+","+
@@ -222,7 +239,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		}
 	}
 
-	// 2. cerem meciurile netraduse:
+	// 4. cerem meciurile netraduse:
 	res = sock.doQuery(
 			"SELECT "+
 			dbLabels.echipa1+","+
@@ -324,7 +341,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 				r2.data = crt.data;
 				r2.statusTrad = res2->getInt(dbLabels.statusTraduceri);
 
-				found |= process(crt, r2, lf, suspecte, pas == 1 ? &postponed : nullptr);
+				found |= process(crt, r2, lf, fmap, suspecte, pas == 1 ? &postponed : nullptr);
 			}
 
 			if (!found) {
@@ -386,13 +403,14 @@ int main(int argc, char* argv[]) {
 	const char* pHomeDir = getenv("HOME");
 	if (pHomeDir) {
 		std::string homeDir(pHomeDir);
-		if (!pathExists(homeDir+"/.maimutza"))
+		if (!pathExists(homeDir+"/.maimutza")) {
 			if (!mkDir(homeDir+"/.maimutza")) {
 				ERROR("Nu am putut crea directorul ~/.maimutza\nLogurile nu vor fi salvate!!!");
 			} else {
 				std::ofstream fErrLog(std::string(pHomeDir) + "/.maimutza/error.log", std::ios::app);
 				logger::setAdditionalErrStream(&fErrLog);
 			}
+		}
 	} else {
 		ERROR("Nu s-a putut accesa $HOME\nLogurile nu vor fi salvate!!!");
 	}
