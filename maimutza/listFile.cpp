@@ -59,6 +59,10 @@ listFile loadListFile(std::string const& filename) {
 }
 
 listFile::IORESULT saveListFile(std::string const& filename, listFile& list) {
+
+	// prima data compactam lista - daca exista duplicate, le merge-uim intr-o singura linie
+	// todo ....
+
 	std::ofstream f(filename);
 	if (!f.is_open()) {
 		ERROR("Nu s-a putut deschide (mode:W) fisierul \"" << filename << "\"");
