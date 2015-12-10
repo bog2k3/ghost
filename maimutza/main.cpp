@@ -64,6 +64,16 @@ struct meciInfo {
 	int statusTrad;
 };
 
+struct tradSuspect {
+	std::string n1;
+	std::string n2;
+	std::string cauza;
+
+	tradSuspect(std::string const& n1, std::string const& n2, std::string const& cauza)
+		: n1(n1), n2(n2), cauza(cauza) {
+	}
+};
+
 EMailer *pEmailer {nullptr};
 std::vector<std::string> emailRecipients;
 
@@ -80,7 +90,7 @@ bool processNetrad(std::string& a1, std::string& a2,
 					std::string& b1, std::string& b2,
 					listFile &lf,
 					WordFreqMap const& fmap,
-					std::vector<std::pair<std::string, std::string>> &suspecte) {
+					std::vector<tradSuspect> &suspecte) {
 	sanitize(a1); sanitize(a2);
 	sanitize(b1); sanitize(b2);
 	StrComp scA(a1, b1);
@@ -103,7 +113,7 @@ bool processNetrad(std::string& a1, std::string& a2,
 	if (!acceptCondition(*statSmall)) {
 		std::string &s1r = statSmall == &statA ? statA.s1 : statB.s1;
 		std::string &s2r = statSmall == &statA ? statA.s2 : statB.s2;
-		suspecte.push_back(std::make_pair(s1r, s2r));
+		suspecte.push_back(tradSuspect(s1r, s2r, statBig->s1 + " = " + statBig->s2));
 		LOGLN("SUSPECT: " << s1r << "   ~   " << s2r << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	}
 	lf.addNewAlias(a1, b1);
@@ -115,7 +125,7 @@ bool processNetrad(std::string& a1, std::string& a2,
 
 bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 		WordFreqMap const& fmap,
-		std::vector<std::pair<std::string, std::string>> &suspecte,
+		std::vector<tradSuspect> &suspecte,
 		std::vector<meciInfo> *postponed) {
 	switch (crt.statusTrad) {
 	case 3:
@@ -153,7 +163,7 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				LOGLN(*pNetrad << "  ->  " << *pEchiv);
 				if (!acceptCondition(cstat)) {
 					// e dubios, nu prea se potriveste, dam warning pe mail
-					suspecte.push_back(std::make_pair(*pEchiv, *pNetrad));
+					suspecte.push_back(tradSuspect(*pEchiv, *pNetrad, ""));
 					LOGLN("SUSPECT: " << *pEchiv << "   ~   " << *pNetrad << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				}
 				return true;
@@ -174,7 +184,7 @@ bool process(meciInfo& crt, meciInfo& r2, listFile &lf,
 				LOGLN(*pR2Netrad << "  ->  " << *pNetrad);
 				if (!acceptCondition(cstat)) {
 					// e dubios, nu prea se potriveste, dam warning pe mail
-					suspecte.push_back(std::make_pair(*pNetrad, *pR2Netrad));
+					suspecte.push_back(tradSuspect(*pNetrad, *pR2Netrad, ""));
 					LOGLN("SUSPECT: " << *pNetrad << "   ~   " << *pR2Netrad << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				}
 				return true;
@@ -255,7 +265,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		return;
 	}
 
-	std::vector<std::pair<std::string, std::string>> suspecte;
+	std::vector<tradSuspect> suspecte;
 	std::vector<meciInfo> meciuriSingulare;
 	std::vector<meciInfo> postponed;
 
@@ -368,7 +378,7 @@ void maimutareste(ISQLSock &sock, std::string const& tabel, std::string const& l
 		if (suspecte.size()) {
 			ss << "Traduceri suspecte >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\r\n\r\n";
 			for (auto d : suspecte) {
-				ss << d.first << "   ?   " << d.second << "\r\n";
+				ss << d.n1 << "   ?   " << d.n2 << "          (cauza: " << d.cauza << ")" << "\r\n";
 			}
 		}
 		if (meciuriSingulare.size()) {

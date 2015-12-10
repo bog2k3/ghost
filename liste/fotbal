@@ -30,11 +30,11 @@ dinamo bucuresti;dinamo
 asa targu mures;asa tg mures
 astra giurgiu;astra
 petrolul ploiesti
-steaua bucuresti
+steaua bucuresti;steaua
 pandurii targu jiu;pandurii tg jiu
 poli timisoara
 cfr cluj
-viitorul constanta;viitorul cta
+viitorul constanta;viitorul cta;viitorul
 concordia chiajna;chiajna
 condor hamburg
 buxtehuder sv
@@ -70,6 +70,7 @@ einheit rudolstadt
 askania bernburg
 eintracht norderstedt
 rehden
+
 bury
 chesterfield
 pembroke athleta fc
@@ -263,8 +264,8 @@ chievo
 atalanta
 ajax
 molde
-viitorul
-steaua
+viitorul constanta;viitorul
+steaua bucuresti;steaua
 zamora fc;zamora
 deportivo la guaira;dep la guaira
 lazio
@@ -614,8 +615,7 @@ thun
 zurich
 ofk belgrade
 javor ivanjica
-cavaliers fc;boys town
-portmore united fc;rivoli united fc
+cavaliers fc
 fsv frankfurt
 mirandes
 real oviedo
@@ -668,7 +668,7 @@ elche
 stuttgart amateurs
 dynamo dresden
 swindon town;swindon
-pandurii tgjiu
+pandurii tgjiu;pandurii
 norwich
 everton
 peterborough
@@ -711,8 +711,10 @@ uwi fc
 waterhouse fc
 airdrieonians
 stranraer
-al jazeera club jordan;al jazeera uae
-ahli al fujirah;al wihdat
+al jazeera club jordan
+al jazeera uae
+ahli al fujirah
+al wihdat
 skenderbeu
 lokomotiv moscova
 lugano
@@ -781,12 +783,14 @@ macclesfield
 ashton united
 borussia dortmund
 eintracht frankfurt
-pandurii
+pandurii tgjiu;pandurii
 afc astra giurgiu
 famalicao
 freamunde
-cavaliers fc;boys town
-portmore united fc;rivoli united fc
+cavaliers fc
+boys town
+portmore united fc
+rivoli united fc
 doncaster
 crewe alexandra;crewe
 spvgg greuther furth;greuther furth
