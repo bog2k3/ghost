@@ -8,9 +8,10 @@
 	FINALIZAT * [farmare] !!! tre sa stergem din DB meciurile care au expirat !!!
 	FINALIZAT * [farmare] adaugare site2
 
-* [PHP] bagat maimutza in schema pentru TRADUCERI ECHIPE !!!
-* [PHP] implementat trimis email pentru echipe care nu pot fi traduse ('NECUNOSCUT')
-* [vi] scris liste echipe/jucatori pentru maimutza
+	FINALIZAT * [PHP] bagat trad-u in schema
+	FINALIZAT * [manual] bagat maimutza in schema pentru TRADUCERI ECHIPE !!!
+	OBSOLETE * [PHP] implementat trimis email pentru echipe care nu pot fi traduse ('NECUNOSCUT')
+	OBSOLETE * [vi] scris liste echipe/jucatori pentru maimutza
 * [PHP] !!! IMPORTANT !!! ordonat cele 2 echipe in ordine alfabetica inainte de calculat hash si introdus in DB
 	(pentru ca pe unele site-uri pot fi in ordinea inversa)
 * [PHP] calculat cotele fiecarui meci ca sa vedem daca sunt suspecte - tre sa respecte un raport
@@ -26,5 +27,5 @@
 	* pe siteurile respective nu mai punem meciul ala (decat o data)
 	* daca mai exista alte perechi (pe alte siteuri) pe acelasi meci, alegem din nou cea mai buna si repetam
 	FINALIZAT * [maimutza] verificat daca exista u19, u21 etc in input si adaugat inapoi in output
-* [DB] sters coloanele: timp, echipa1_internal, echipa2_internal
-* [trad] invalidCharHandler in daemon - trimite pe mail lista cu nume care contin caractere invalide
+	FINALIZAT * [DB] sters coloanele: timp, echipa1_internal, echipa2_internal
+	FINALIZAT * [trad] invalidCharHandler in daemon - trimite pe mail lista cu nume care contin caractere invalide
