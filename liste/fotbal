@@ -70,7 +70,6 @@ einheit rudolstadt
 askania bernburg
 eintracht norderstedt
 rehden
-
 bury
 chesterfield
 pembroke athleta fc
@@ -148,7 +147,6 @@ ca nacional potosi;nacional potosi
 blooming
 ca ciclon
 san jose oruro
-austria vienna;austria viena
 pec zwolle;fc zwolle
 az alkmaar
 as roma;roma
@@ -264,8 +262,6 @@ chievo
 atalanta
 ajax
 molde
-viitorul constanta;viitorul
-steaua bucuresti;steaua
 zamora fc;zamora
 deportivo la guaira;dep la guaira
 lazio
@@ -279,7 +275,6 @@ manchester city
 swansea
 anderlecht
 oostende
-1 fc heidenheim;heidenheim
 lech poznan
 zaglebie lubin
 oldham athletic;oldham
@@ -308,7 +303,6 @@ angers sco;angers
 bordeaux
 huddersfield
 bristol city
-linlithgow rose;linlithgow
 usm blida
 js saoura
 bristol rovers
@@ -318,10 +312,11 @@ melbourne victory
 viktoria plzen
 villarreal
 sporting braga b;braga b
+sporting lisbon;sporting l b;sporting l
 fc porto b;porto b
+aves
 dinamo zagreb
 bayern munchen;bayern munich
-sporting farense;farense
 mansfield town;mansfield
 leyton orient
 inverness
@@ -365,12 +360,10 @@ chaves
 cd mafra;mafra
 oxford city
 ebbsfleet united
-schalke 04;schalke
 twente
 de graafschap
 st gilloise
 deinze
-as roma;roma
 radniki nis
 cukaricki belgrade
 sonnenhof grossaspach
@@ -419,7 +412,6 @@ luton town
 northampton town
 udinese
 inter milano;inter
-sporting gijon;sp gijon
 getafe
 real sociedad
 besiktas
@@ -433,19 +425,14 @@ kayserispor
 akhisar belediye gs;akhisar bld spor
 east thurrock
 maidenhead united
-al gharrafa;al gharafa
-clube oriental de lisboa;oriental
 legia varsovia;legia warsaw
 piast gliwice
-inter milano;inter
-fk krasnodar;krasnodar
 admira wacker
 mattersburg
 las palmas
 betis sevilla;real betis
 colchester
 barnsley
-caykur rizespor;rizespor
 stourbridge
 kidderminster
 st truidense;st truiden
@@ -457,11 +444,9 @@ niort
 tours
 swindon town;swindon
 rochdale
-ca nacional potosi;nacional potosi
 standard liege
 carmelita
 santos dg
-termalica bruk bet nieciecza;lks nieciecza
 port vale
 scunthorpe utd;scunthorpe
 rubin kazan
@@ -489,7 +474,6 @@ peruwelz
 sandhausen
 e braunschweig;braunschweig
 salzburg
-rapid vienna;rapid viena
 ajaccio gfco
 portsmouth
 hartlepool
@@ -501,7 +485,6 @@ lokomotiva zagreb
 istra 1961
 aberdeen
 hearts
-gillingham fc;gillingham
 qpr
 burnley
 partizan belgrade;partizan
@@ -522,20 +505,15 @@ oxford united;oxford utd
 carlisle
 ramtha sc;ramtha
 al asalah
-partizan belgrade;partizan
-sporting lisbon;sporting l
 hamburger sv ii;hamburg am
-fc hansa luneburg;hansa luneburg
 beroe stara zagora;beroe
 cherno more varna;cherno more
-scunthorpe utd;scunthorpe
 lechia gdansk
 wisla cracovia;wisla krakow
 heerenveen
 excelsior
 plymouth argyle
 cambridge utd
-paris st germain;psg
 nurnberg
 altrincham
 leamington
@@ -551,7 +529,6 @@ lanciano
 cagliari
 independiente santa fe;indep santa fe
 ca huracan;huracan
-fleetwood town;fleetwood
 bury town
 dulwich hamlet
 balzan youths
@@ -565,11 +542,8 @@ arminia bielefeld
 st pauli
 the strongest
 sport boys
-zenit st petersburg;zenit
 lokomotiv gorna oryahovitsa
 pfc montana
-ramtha sc;ramtha
-cs uruguay de coronado;uruguay de coronado
 ac milan;milan
 verona
 boreham wood
@@ -599,12 +573,10 @@ kasimpasa
 konyaspor
 1860 munich
 hertha b
-oldham athletic;oldham
 celta vigo
 espanyol
 bradford city;bradford
 southend
-oxford united;oxford utd
 borac cacak
 mladost lucani
 crystal palace
@@ -644,7 +616,6 @@ dnipro dniprope;dnipro d
 rosenborg
 sheffield utd
 coventry city
-hertha berlin;hertha
 ado den haag;den haag
 willem ii tilburg;willem
 eskisehirspor
@@ -656,18 +627,14 @@ es sahel
 eo sidi bouzid
 real zaragoza
 numancia
-barnet fc;barnet
 calcio como;como
 crotone
-fc porto;porto
 karabakh agdam;karabakh
-bayer leverkusen;leverkusen
 borussia monchengladbach
 girona
 elche
 stuttgart amateurs
 dynamo dresden
-swindon town;swindon
 pandurii tgjiu;pandurii
 norwich
 everton
@@ -676,7 +643,6 @@ shrewsbury town;shrewsbury
 us foggia
 benevento calcio
 kaiserslautern
-msv duisburg;duisburg
 najran sc
 al faisaly
 vozdovac
@@ -685,25 +651,17 @@ na hussein dey
 ca constantine
 reims
 nice
-olympiakos piraeus;olympiakos
-evian thonon gaillard;evian tg
 sutton coldfield
 barrow
 nakhon ratchasima fc
 sisaket
-karabakh agdam;karabakh
 concord rangers
 lowestoft town
 almeria
 huesca
-cd mafra;mafra
-dagenham;dag
 notts county
 newport county
-bradford city;bradford
 fc botosani
-exeter city;exeter
-york city;york
 west brom;wba
 sturm graz
 grodig
@@ -730,8 +688,6 @@ dijon
 middlesbrough
 birmingham
 braga
-sporting lisbon b;sporting braga b;sporting l b;braga b
-fc porto b;porto b;aves
 truro city
 cirencester town
 al hilal
@@ -748,8 +704,6 @@ derby county
 brighton hove albion
 usm el harrach
 belouizdad
-sporting lisbon b;sporting braga b;sporting l b
-fc porto b;aves
 tranmere
 wrexham
 fc famalicao
@@ -772,7 +726,6 @@ levadiakos
 paok
 lugo
 ponferradina
-sheffield wednesday;sheffield wed
 ferencvaros
 ujpest
 albacete
@@ -783,26 +736,21 @@ macclesfield
 ashton united
 borussia dortmund
 eintracht frankfurt
-pandurii tgjiu;pandurii
 afc astra giurgiu
 famalicao
 freamunde
-cavaliers fc
 boys town
 portmore united fc
 rivoli united fc
 doncaster
 crewe alexandra;crewe
-spvgg greuther furth;greuther furth
 club petrolero
 bolivar
 rw erfurt
-mansfield town;mansfield
 army united
 suphan buri
 blackburn
 rotherham utd;rotherham
-dnipro dniprope;dnipro d
 werder bremen am
 hansa rostock
 luton
@@ -826,35 +774,24 @@ platanias
 pas giannina
 tigres
 unam pumas
-shrewsbury town;shrewsbury
-crewe alexandra;crewe
 hemel hampstead town
 e frankfurt
 aldershot
 eastleigh
-salernitana 1919;salernitana
 derby
 brighton
-bayern munchen;bayern munich
 preston north end;preston
 reading
 1 ffc turbine potsdam
 vfl wolfsburg
-sporting lisbon;sporting l
 braintree town
 bromley
-nuneaton town;nuneaton
 al ahli uae
 al nasr dubai
 osotspa
 chonburi fc
-nimes olympique;nimes
-calcio como;como
-ross county fc;ross county
-wisla cracovia;wisla krakow
 metalurg skopje
 rabotnicki skopje
-preston north end;preston
 curzon ashton
 weston super mare
 wealdstone

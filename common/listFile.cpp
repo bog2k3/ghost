@@ -12,12 +12,17 @@
 #include <fstream>
 
 void listFile::addNewAlias(std::string key, std::string alias) {
-	auto line = names2Lines.find(key);
 	auto betterKey = [](std::string const& left, std::string const& right) -> bool {
 		unsigned nwl = getNumberOfWords(left),
 			nwr = getNumberOfWords(right);
 		return nwl > nwr || (nwl == nwr && left.length() > right.length());
 	};
+	if (betterKey(alias, key)) {
+		std::string aux = key;
+		key = alias;
+		alias = aux;
+	}
+	auto line = names2Lines.find(key);
 	if (line == names2Lines.end()) {
 		// inregistrare noua
 		if (betterKey(alias, key)) {
@@ -30,9 +35,10 @@ void listFile::addNewAlias(std::string key, std::string alias) {
 			lines.push_back({key, alias});
 		else
 			lines.push_back({key});
-		names2Lines[key] = names2Lines[alias] = lines.size() - 1;
+		names2Lines[key].insert(lines.size() - 1);
+		names2Lines[alias].insert(lines.size() - 1);
 	} else {
-		auto &crtLine = lines[line->second];
+		auto &crtLine = lines[*line->second.begin()];
 		// check if not present already, then add:
 		if (std::find(crtLine.begin(), crtLine.end(), alias) == crtLine.end()) {
 			crtLine.push_back(alias);
@@ -53,15 +59,46 @@ listFile loadListFile(std::string const& filename) {
 	while (std::getline(f, line)) {
 		lf.lines.push_back(strSplit(line,';'));
 		for (auto tk : lf.lines.back())
-			lf.names2Lines[tk] = lf.lines.size() - 1;
+			lf.names2Lines[tk].insert(lf.lines.size() - 1);
 	}
 	return lf;
 }
 
-listFile::IORESULT saveListFile(std::string const& filename, listFile& list) {
+static void mergeLines(listFile &list, std::vector<std::set<int>> const& mergeSets) {
+	for (auto s : mergeSets) {
+		int keyLine = -1;
+		for (auto l : s) {
+			if (list.lines[l].empty())
+				continue;
+			if (keyLine == -1) {
+				keyLine = l;
+				continue;
+			}
+			for (auto w : list.lines[l])
+				list.addNewAlias(list.lines[keyLine][0], w);
 
+			list.lines[l].clear();
+		}
+	}
+}
+
+static void trimEmptyLines(listFile &list) {
+	for (uint i=0; i<list.lines.size(); i++) {
+		if (list.lines[i].empty()) {
+			list.lines.erase(list.lines.begin()+(i--));
+		}
+	}
+}
+
+listFile::IORESULT saveListFile(std::string const& filename, listFile& list) {
 	// prima data compactam lista - daca exista duplicate, le merge-uim intr-o singura linie
-	// todo ....
+	std::vector<std::set<int>> mergeSets;
+	for (auto &rec : list.names2Lines) {
+		if (rec.second.size() > 1)
+			mergeSets.push_back(rec.second);
+	}
+	mergeLines(list, mergeSets);
+	trimEmptyLines(list);
 
 	std::ofstream f(filename);
 	if (!f.is_open()) {

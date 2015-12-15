@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 struct listFile {
 	enum IORESULT {
@@ -18,7 +19,7 @@ struct listFile {
 		IO_OK
 	} io_result = IO_FAIL;
 
-	std::map<std::string, int> names2Lines;			// maps each variation of a name to its line in the list file
+	std::map<std::string, std::set<int>> names2Lines;	// maps each variation of a name to its lines in the list file
 	std::vector<std::vector<std::string>> lines;	// each line is a vector<string> with alternate names
 
 	// key is the new/existing key, alias the new alis.

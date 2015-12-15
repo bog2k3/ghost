@@ -7,8 +7,7 @@
 
 //#define DUMMY_SQL_SOCKET
 
-#include "listFile.h"
-
+#include "../common/listFile.h"
 #include "../common/configFile.h"
 #include "../common/cmdLine.h"
 #include "../common/log.h"

@@ -20,7 +20,7 @@ std::map<std::string, std::string> mapDiacrit = {
 		{"ț", "t"}, {"Ț", "T"},
 };
 
-bool removeDiacritics(std::string &in_out) {
+static bool removeDiacritics(std::string &in_out) {
 	for (auto &pair : mapDiacrit)
 		replaceAllSubstr(in_out, pair.first, pair.second);
 	for (char c : in_out)
