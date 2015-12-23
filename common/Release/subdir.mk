@@ -11,6 +11,7 @@ CPP_SRCS += \
 ../configFile.cpp \
 ../dir.cpp \
 ../eMailer.cpp \
+../listFile.cpp \
 ../log.cpp \
 ../sanitize.cpp \
 ../strCompare.cpp \
@@ -25,6 +26,7 @@ OBJS += \
 ./configFile.o \
 ./dir.o \
 ./eMailer.o \
+./listFile.o \
 ./log.o \
 ./sanitize.o \
 ./strCompare.o \
@@ -39,6 +41,7 @@ CPP_DEPS += \
 ./configFile.d \
 ./dir.d \
 ./eMailer.d \
+./listFile.d \
 ./log.d \
 ./sanitize.d \
 ./strCompare.d \
@@ -50,7 +53,7 @@ CPP_DEPS += \
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross G++ Compiler'
-	g++ -std=c++0x -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -std=c++0x -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
